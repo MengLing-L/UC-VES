@@ -33,7 +33,7 @@ struct Range_Witness
  
 struct Range_Proof
 {
-    EC_POINT *delta;     
+    string delta;     
     vector<EC_POINT *> c;
     BIGNUM *chl;
     vector<BIGNUM *> z; 
@@ -76,7 +76,7 @@ void NIZK_Range_Witness_free(Range_Witness &witness)
 
 void NIZK_Range_Proof_new(Range_Proof &proof, Range_PP &pp)
 {
-    proof.delta = EC_POINT_new(group);
+    proof.delta = "";
     proof.chl = BN_new();
     proof.z.resize(pp.VECTOR_LEN); 
     proof.t.resize(pp.VECTOR_LEN); 
@@ -86,7 +86,7 @@ void NIZK_Range_Proof_new(Range_Proof &proof, Range_PP &pp)
 
 void NIZK_Range_Proof_free(Range_Proof &proof)
 {
-    EC_POINT_free(proof.delta);
+  
     ECP_vec_free(proof.c);
     BN_free(proof.chl);
     BN_vec_free(proof.z); 
@@ -120,7 +120,7 @@ void Range_Proof_print(Range_Proof &proof)
 {
     SplitLine_print('-'); 
     cout << "NIZKPoK for Range Proofs >>> " << endl; 
-    ECP_print(proof.delta, "proof.delta");
+    cout << "proof.delta: " << proof.delta << endl;
     ECP_vec_print(proof.c, "proof.c");
     BN_print(proof.chl, "proof.chl"); 
     BN_vec_print(proof.z, "proof.z");
@@ -128,8 +128,7 @@ void Range_Proof_print(Range_Proof &proof)
 }
 
 void Range_Proof_serialize(Range_Proof &proof, ofstream &fout)
-{
-    ECP_serialize(proof.delta, fout); 
+{ 
     ECP_vec_serialize(proof.c, fout);
 
     BN_serialize(proof.chl,  fout);
@@ -137,7 +136,7 @@ void Range_Proof_serialize(Range_Proof &proof, ofstream &fout)
 
 void Range_Proof_deserialize(Range_Proof &proof, ifstream &fin)
 {
-    ECP_deserialize(proof.delta, fin); 
+    
     ECP_vec_deserialize(proof.c, fin);
 
     BN_deserialize(proof.chl,  fin);
@@ -155,6 +154,17 @@ void NIZK_Range_Init(Range_PP &pp,
                             Range_Instance &instance, 
                             Range_Witness &witness, 
                             Range_Proof &proof){
+    //hard code C
+
+    const EC_POINT *vec_A[2]; 
+    const BIGNUM *vec_x[2];
+
+    vec_A[0] = pp.g; 
+    vec_A[1] = pp.h;
+    vec_x[0] = witness.w; 
+    vec_x[1] = witness.r;
+    EC_POINTs_mul(group, instance.C, NULL, 2, vec_A, vec_x, bn_ctx);
+
     BIGNUM *sum = BN_new(); 
     BIGNUM *tmp_sum = BN_new();
     BIGNUM *tmp_sum0 = BN_new();
@@ -164,6 +174,9 @@ void NIZK_Range_Init(Range_PP &pp,
     BIGNUM *B = BN_new();
     BIGNUM *sigma = BN_new();
     BIGNUM *FOUR = BN_new();
+    EC_POINT *Cinv = EC_POINT_new(group);
+    EC_POINT *D = EC_POINT_new(group);
+    EC_POINT *Cinvm_sum = EC_POINT_new(group);
     vector<BIGNUM *> x(pp.VECTOR_LEN);
     BN_vec_new(x);
     vector<BIGNUM *> r(pp.VECTOR_LEN);
@@ -174,6 +187,10 @@ void NIZK_Range_Init(Range_PP &pp,
     BN_vec_new(s);
     vector<EC_POINT *> d(pp.VECTOR_LEN);
     ECP_vec_new(d);
+    //vector<EC_POINT *> c(pp.VECTOR_LEN);
+    //ECP_vec_new(c);
+    vector<EC_POINT *> c_minv(pp.VECTOR_LEN);
+    ECP_vec_new(c_minv);
 
     BN_set_word(FOUR, 4);
 
@@ -195,6 +212,87 @@ void NIZK_Range_Init(Range_PP &pp,
     BN_set_word (x[1], 2);
     BN_set_word (x[2], 101);
     BN_set_word (x[3], 186);
+    if (BN_cmp(tmp_sum, sum) == 0){
+        BN_print(x[1], "x[1]");
+        BN_print(x[2], "x[2]");
+        BN_print(x[3], "x[3]");
+    }
+
+    BN_copy(r[0], witness.r);
+    EC_POINT_copy(Cinv, instance.C);
+    EC_POINT_invert(group, Cinv, bn_ctx);
+
+    vec_A[0] = Cinv; 
+    vec_A[1] = pp.g;
+    vec_x[0] = BN_1; 
+    vec_x[1] = B;
+    EC_POINTs_mul(group, proof.c[0], NULL, 2, vec_A, vec_x, bn_ctx);// c^-1 g^B
+
+    for (int i=1; i < pp.VECTOR_LEN; i++){
+        BN_random (r[i]);
+        BN_mod (r[i], r[i], B, bn_ctx);
+        vec_A[0] = pp.g; 
+        vec_A[1] = pp.h;
+        vec_x[0] = x[i]; 
+        vec_x[1] = r[i];
+        EC_POINTs_mul(group, proof.c[i], NULL, 2, vec_A, vec_x, bn_ctx); // g^x_i h^r_i
+    }
+
+    for (int i=0; i < pp.VECTOR_LEN; i++){
+        BN_random (m[i]);
+        BN_mod (m[i], m[i], B, bn_ctx);
+        BN_random (s[i]);
+        BN_mod (s[i], s[i], B, bn_ctx);
+        vec_A[0] = pp.g; 
+        vec_A[1] = pp.h;
+        vec_x[0] = m[i]; 
+        vec_x[1] = s[i];
+        EC_POINTs_mul(group, d[i], NULL, 2, vec_A, vec_x, bn_ctx); // g^m_i h^s_i 
+    }
+
+    BN_random (sigma);
+    BN_mod (sigma, sigma, B, bn_ctx);
+
+
+    for (int i=0; i < pp.VECTOR_LEN; i++){
+        EC_POINT_mul(group, c_minv[i], NULL, proof.c[i], m[i], bn_ctx);// c_i^m_i
+        EC_POINT_invert(group, c_minv[i], bn_ctx);// c_i^-m_i
+    }
+
+
+    vec_A[0] = c_minv[1]; 
+    vec_A[1] = c_minv[2];
+    vec_x[0] = BN_1; 
+    vec_x[1] = BN_1;
+    EC_POINTs_mul(group, Cinvm_sum, NULL, 2, vec_A, vec_x, bn_ctx); //c_1^-m_1 c_2^-m_2 
+
+    vec_A[0] = Cinvm_sum; 
+    vec_A[1] = c_minv[3];
+    vec_x[0] = BN_1; 
+    vec_x[1] = BN_1;
+    EC_POINTs_mul(group, Cinvm_sum, NULL, 2, vec_A, vec_x, bn_ctx); //c_1^-m_1 c_2^-m_2 c_3^-m_3
+
+    BN_mul (tmp_sum1, m[0], FOUR, bn_ctx);//4*m_0
+
+    vec_A[0] = pp.h; 
+    vec_A[1] = instance.C;
+    vec_x[0] = sigma; 
+    vec_x[1] = tmp_sum1;
+    EC_POINTs_mul(group, D, NULL, 2, vec_A, vec_x, bn_ctx); //h^sigma c^4m_0
+
+    vec_A[0] = D; 
+    vec_A[1] = Cinvm_sum;
+    vec_x[0] = BN_1; 
+    vec_x[1] = BN_1;
+    EC_POINTs_mul(group, D, NULL, 2, vec_A, vec_x, bn_ctx); // h^sigma c^4m_0 c_1^-m_1 c_2^-m_2 c_3^-m_3
+
+    for (int i=0; i < pp.VECTOR_LEN; i++){
+        proof.delta = proof.delta + ECP_ep2string(d[i]);
+    }
+
+    proof.delta = proof.delta + ECP_ep2string(D);
+
+    Range_Proof_print(proof);
     //BN_set_word (sum, 30);
     //BN_print(sum, "sum");
     //BN_mul (tmp_sum0, x[0], x[0], bn_ctx); // x_0^2
@@ -241,12 +339,17 @@ void NIZK_Range_Init(Range_PP &pp,
     BN_free(tmp_sum2);
     BN_free(sigma); 
     BN_free(B);
+    EC_POINT_free(D);
+    EC_POINT_free(Cinvm_sum);
     BN_free(FOUR);
+    EC_POINT_free(Cinv);
     BN_vec_free(x);
     BN_vec_free(r);
     BN_vec_free(m);
     BN_vec_free(s);
     ECP_vec_free(d);
+    //ECP_vec_free(c);
+    ECP_vec_free(c_minv);
 }
 
 
