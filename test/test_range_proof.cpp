@@ -18,12 +18,13 @@ void test_protocol()
     Range_Witness witness;
     NIZK_Range_Witness_new(witness);
     Range_Proof proof;
-    NIZK_Range_Proof_new(proof);
+    NIZK_Range_Proof_new(proof,pp);
 
-    NIZK_Range_Setup(pp, 3);
+    NIZK_Range_Setup(pp, 4);
 
 
-    BN_random(witness.w);
+    //BN_random(witness.w);
+    BN_set_word(witness.w, 200);
 
     NIZK_Range_Init(pp, instance, witness, proof);
 
@@ -31,7 +32,6 @@ void test_protocol()
     NIZK_Range_Instance_free(instance);
     NIZK_Range_Witness_free(witness);
     NIZK_Range_Proof_free(proof);
-    BN_free(x);
 
 }
 

@@ -16,8 +16,8 @@ this hpp implements NIZKPoK for discrete logarithm equality
 struct Range_PP
 {
     EC_POINT *g, *h; 
-    size_t VECTOR_LEN; // VECTOR_LEN = 3;
-}
+    size_t VECTOR_LEN; // VECTOR_LEN = 4;
+};
 
 struct Range_Instance
 {
@@ -105,7 +105,7 @@ void Range_PP_print(Range_PP &pp)
 void Range_Instance_print(Range_Instance &instance)
 {
     cout << "Range Proofs Instance >>> " << endl;  
-    ECP_print(instance.c, "instance.c"); 
+    ECP_print(instance.C, "instance.c"); 
     
 } 
 
@@ -160,6 +160,7 @@ void NIZK_Range_Init(Range_PP &pp,
     BIGNUM *tmp_sum0 = BN_new();
     BIGNUM *tmp_sum1 = BN_new(); 
     BIGNUM *tmp_sum2 = BN_new();
+    BIGNUM *tmp_sum3 = BN_new();
     BIGNUM *B = BN_new();
     BIGNUM *sigma = BN_new();
     BIGNUM *FOUR = BN_new();
@@ -172,40 +173,66 @@ void NIZK_Range_Init(Range_PP &pp,
     vector<BIGNUM *> s(pp.VECTOR_LEN);
     BN_vec_new(s);
     vector<EC_POINT *> d(pp.VECTOR_LEN);
-    BN_vec_new(d);
+    ECP_vec_new(d);
 
     BN_set_word(FOUR, 4);
 
-    BN_exp (B, BN_2, exp, bn_ctx);
-    BN_set_word(B, uint64_t(pow(2, BN_LEN*8))); 
+    //BN_set_word(B, uint64_t(pow(2, BN_LEN*8))); 
+    BN_set_word(B, uint64_t(pow(2, 8))); 
+    BN_print(B, "B");
     BN_sub (x[0], B, witness.w); //B-x
+    BN_print(x[0], "B-x");
 
     BN_mul (sum, x[0], witness.w, bn_ctx); //x(B-x)
-    BN_mul (sum, sum, FOUR, bn_ctx); //x(B-x)
+    //BN_mod (sum, sum, B, bn_ctx);
+    
+    BN_mul (sum, sum, FOUR, bn_ctx); //4x(B-x)
+    //BN_mod (sum, sum, B, bn_ctx);
 
     BN_add (sum, sum, BN_1);
+    //BN_mod (sum, sum, B, bn_ctx);
 
-    BN_mul (tmp_sum0, x[0], x[0], bn_ctx); // x_0^2
-
+    BN_set_word (x[1], 2);
+    BN_set_word (x[2], 101);
+    BN_set_word (x[3], 186);
+    //BN_set_word (sum, 30);
+    //BN_print(sum, "sum");
+    //BN_mul (tmp_sum0, x[0], x[0], bn_ctx); // x_0^2
+                
+/*
     while(BN_cmp(x[1], sum) == -1){
         BN_mul (tmp_sum1, x[1], x[1], bn_ctx); //x_1^2
+    //	BN_mod (tmp_sum1, tmp_sum1, B, bn_ctx);
         while(BN_cmp(x[2], sum) == -1){
-            BN_mul (tmp_sum2, x[2], x[2], bn_ctx); //x_2^2
-            BN_add (tmp_sum, tmp_sum1, tmp_sum2); //x_1^2 + x_2^2
-            BN_add (tmp_sum, tmp_sum, tmp_sum0); //x_0^2 + x_1^2 + x_2^2
+           	BN_mul (tmp_sum2, x[2], x[2], bn_ctx); //x_2^2
+    //		BN_mod (tmp_sum2, tmp_sum2, B, bn_ctx);
+        	while(BN_cmp(x[3], sum) == -1){
+            		BN_mul (tmp_sum3, x[3], x[3], bn_ctx); //x_3^2
+    //			BN_mod (tmp_sum3, tmp_sum3, B, bn_ctx);
+            		BN_add (tmp_sum, tmp_sum1, tmp_sum2); //x_1^2 + x_2^2
+            		BN_add (tmp_sum, tmp_sum, tmp_sum3); //x_3^2 + x_1^2 + x_2^2
+    //			BN_mod (tmp_sum, tmp_sum, B, bn_ctx);
 
-            if (BN_cmp(tmp_sum, sum) == 0){
-                BN_print(tmp_sum, "tmp_sum");
-                BN_print(sum, "sum");
-                break;
-            }
+            		if (BN_cmp(tmp_sum, sum) == 0){
+    				BN_print(x[1], "x[1]");
+    				BN_print(x[2], "x[2]");
+    				BN_print(x[3], "x[3]");
+                		break;
+            		}
+            		BN_add (x[3], x[3], BN_1);
+		}
+            	if (BN_cmp(tmp_sum, sum) == 0){
+            		break;
+        	}
             BN_add (x[2], x[2], BN_1);
+    	    BN_set_word (x[3], 0);
         }
         if (BN_cmp(tmp_sum, sum) == 0){
             break;
         }
         BN_add (x[1], x[1], BN_1);
-    }
+    	BN_set_word (x[2], 0);
+    }*/
 
     BN_free(sum); 
     BN_free(tmp_sum);
