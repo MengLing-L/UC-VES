@@ -30,6 +30,8 @@ void test_protocol()
 
     NIZK_Range_Prove(pp, instance, witness, proof);
 
+    NIZK_Range_Verify(pp, instance, witness, proof);
+
     NIZK_Range_PP_free(pp);
     NIZK_Range_Instance_free(instance);
     NIZK_Range_Witness_free(witness);

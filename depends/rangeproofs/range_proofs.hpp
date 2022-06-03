@@ -396,5 +396,110 @@ void NIZK_Range_Prove(Range_PP &pp,
 }
 
 
+bool NIZK_Range_Verify(Range_PP &pp, 
+                            Range_Instance &instance, 
+                            Range_Witness &witness, 
+                            Range_Proof &proof){
+
+    const EC_POINT *vec_A[3]; 
+    const BIGNUM *vec_x[3];
+
+    vector<EC_POINT *> c_invchl(pp.VECTOR_LEN);
+    ECP_vec_new(c_invchl);
+    vector<EC_POINT *> f(pp.VECTOR_LEN);
+    ECP_vec_new(f);
+    EC_POINT *F = EC_POINT_new(group);
+    vector<EC_POINT *> c_zinv(pp.VECTOR_LEN);
+    ECP_vec_new(c_zinv);
+    EC_POINT *Cinvz_sum = EC_POINT_new(group);
+    BIGNUM *FOUR_z_0 = BN_new();
+    BIGNUM *FOUR = BN_new();
+
+    BN_set_word (FOUR, 4);
+
+
+    for (int i=0; i < pp.VECTOR_LEN; i++){
+        EC_POINT_mul (group, c_invchl[i], NULL, proof.c[i], proof.chl, bn_ctx);
+        EC_POINT_invert (group, c_invchl[i], bn_ctx);
+
+        vec_A[0] = pp.g; 
+        vec_A[1] = pp.h;
+        vec_A[2] = c_invchl[i];
+        vec_x[0] = proof.z[i]; 
+        vec_x[1] = proof.t[i];
+        vec_x[2] = BN_1;
+        EC_POINTs_mul(group, f[i], NULL, 3, vec_A, vec_x, bn_ctx);
+
+    }
+    
+
+    for (int i=1; i < pp.VECTOR_LEN; i++){
+        EC_POINT_mul(group, c_zinv[i], NULL, proof.c[i], proof.z[i], bn_ctx);// c_i^z_i
+        EC_POINT_invert(group, c_zinv[i], bn_ctx);// c_i^-z_i
+    }
+
+
+    vec_A[0] = c_zinv[1]; 
+    vec_A[1] = c_zinv[2];
+    vec_A[2] = c_zinv[3];
+    vec_x[0] = BN_1; 
+    vec_x[1] = BN_1;
+    vec_x[2] = BN_1;
+    EC_POINTs_mul(group, Cinvz_sum, NULL, 3, vec_A, vec_x, bn_ctx); //c_1^-z_1 c_2^-z_2 c_3^-z_3
+
+    BN_mul (FOUR_z_0, FOUR, proof.z[0], bn_ctx);
+
+    vec_A[0] = pp.h; 
+    vec_A[1] = pp.g;
+    vec_A[2] = instance.C;
+    vec_x[0] = proof.tau; 
+    vec_x[1] = proof.chl;
+    vec_x[2] = FOUR_z_0;
+    EC_POINTs_mul(group, F, NULL, 3, vec_A, vec_x, bn_ctx);
+
+    vec_A[0] = F; 
+    vec_A[1] = Cinvz_sum;
+    vec_x[0] = BN_1; 
+    vec_x[1] = BN_1;
+    EC_POINTs_mul(group, F, NULL, 2, vec_A, vec_x, bn_ctx);
+
+    string res = "";
+
+    for (int i=0; i < pp.VECTOR_LEN; i++){
+        res = res + ECP_ep2string(f[i]);
+    }
+
+    res = res + ECP_ep2string(F);
+
+
+    bool Validity = (res == proof.delta);
+
+
+    #ifdef DEBUG
+    
+    if (Validity) 
+    { 
+        cout<< "Proof accepts >>>" << endl; 
+        
+    }
+    else 
+    {
+        cout<< "Proof rejects >>>" << endl; 
+        cout<< "res: " << res << endl;
+        cout<< "proof.delta: " << proof.delta << endl;
+       
+    }
+    #endif
+
+    ECP_vec_free (c_invchl);
+    ECP_vec_free (f);
+    EC_POINT_free (F);
+    EC_POINT_free (Cinvz_sum);
+    ECP_vec_free (c_zinv);
+    BN_free (FOUR_z_0);
+    BN_free (FOUR);
+    return Validity;
+
+}
 
 #endif
