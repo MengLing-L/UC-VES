@@ -28,7 +28,7 @@ void test_protocol()
     BN_set_word(witness.w, 200);
     BN_set_word(witness.r, 200);
 
-    NIZK_Range_Init(pp, instance, witness, proof);
+    NIZK_Range_Prove(pp, instance, witness, proof);
 
     NIZK_Range_PP_free(pp);
     NIZK_Range_Instance_free(instance);

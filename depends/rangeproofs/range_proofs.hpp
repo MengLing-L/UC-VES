@@ -38,6 +38,7 @@ struct Range_Proof
     BIGNUM *chl;
     vector<BIGNUM *> z; 
     vector<BIGNUM *> t;
+    BIGNUM *tau;
 };
 
 void NIZK_Range_PP_new(Range_PP &pp){
@@ -78,6 +79,7 @@ void NIZK_Range_Proof_new(Range_Proof &proof, Range_PP &pp)
 {
     proof.delta = "";
     proof.chl = BN_new();
+    proof.tau = BN_new();
     proof.c.resize(pp.VECTOR_LEN); 
     proof.z.resize(pp.VECTOR_LEN); 
     proof.t.resize(pp.VECTOR_LEN); 
@@ -91,6 +93,7 @@ void NIZK_Range_Proof_free(Range_Proof &proof)
   
     ECP_vec_free(proof.c);
     BN_free(proof.chl);
+    BN_free(proof.tau);
     BN_vec_free(proof.z); 
     BN_vec_free(proof.t);
     proof.c.resize(0);
@@ -125,6 +128,7 @@ void Range_Proof_print(Range_Proof &proof)
     cout << "proof.delta: " << proof.delta << endl;
     ECP_vec_print(proof.c, "proof.c");
     BN_print(proof.chl, "proof.chl"); 
+    BN_print(proof.tau, "proof.tau");
     BN_vec_print(proof.z, "proof.z");
     BN_vec_print(proof.t, "proof.t");
 }
@@ -133,6 +137,7 @@ void Range_Proof_serialize(Range_Proof &proof, ofstream &fout)
 { 
     ECP_vec_serialize(proof.c, fout);
 
+    BN_serialize(proof.tau,  fout);
     BN_serialize(proof.chl,  fout);
 } 
 
@@ -141,6 +146,7 @@ void Range_Proof_deserialize(Range_Proof &proof, ifstream &fin)
     
     ECP_vec_deserialize(proof.c, fin);
 
+    BN_deserialize(proof.tau,  fin);
     BN_deserialize(proof.chl,  fin);
 } 
 
@@ -152,7 +158,7 @@ void NIZK_Range_Setup(Range_PP &pp, size_t VECTOR_LEN){
     pp.VECTOR_LEN = VECTOR_LEN;
 }
 
-void NIZK_Range_Init(Range_PP &pp, 
+void NIZK_Range_Prove(Range_PP &pp, 
                             Range_Instance &instance, 
                             Range_Witness &witness, 
                             Range_Proof &proof){
@@ -176,6 +182,7 @@ void NIZK_Range_Init(Range_PP &pp,
     BIGNUM *B = BN_new();
     BIGNUM *sigma = BN_new();
     BIGNUM *FOUR = BN_new();
+    BIGNUM *x_r_sum = BN_new();
     EC_POINT *Cinv = EC_POINT_new(group);
     EC_POINT *D = EC_POINT_new(group);
     EC_POINT *Cinvm_sum = EC_POINT_new(group);
@@ -293,6 +300,39 @@ void NIZK_Range_Init(Range_PP &pp,
     }
 
     proof.delta = proof.delta + ECP_ep2string(D);
+    
+    //Compute challenge
+
+    BN_random (proof.chl);
+
+
+    for (int i=0; i < pp.VECTOR_LEN; i++){
+        BN_mul (proof.z[i], proof.chl, x[i], bn_ctx); // chl*x_i
+        BN_add (proof.z[i], proof.z[i], m[i]); // m_i + chl*x_i
+
+        BN_mul (proof.t[i], proof.chl, r[i], bn_ctx); // chl*r_i
+        BN_add (proof.t[i], proof.t[i], s[i]); // s_i + chl*r_i
+    }
+
+    BN_set_word (x_r_sum, 0);
+    for (int i=1; i < pp.VECTOR_LEN; i++){
+        BN_set_word (tmp_sum1, 1);
+        BN_mul (tmp_sum1, tmp_sum1, x[i], bn_ctx);
+        BN_mul (tmp_sum1, tmp_sum1, r[i], bn_ctx); // x_ir_i
+
+        BN_add (x_r_sum, x_r_sum, tmp_sum1);
+    }
+
+    BN_set_word (tmp_sum, 1);
+    BN_mul (tmp_sum, tmp_sum, x[0], bn_ctx);
+    BN_mul (tmp_sum, tmp_sum, r[0], bn_ctx);
+    BN_mul (tmp_sum, tmp_sum, FOUR, bn_ctx);
+
+    BN_add (proof.tau, tmp_sum, x_r_sum); // x_1r_1 + x_2r_3 + x_3r_3 + 4x_0r_0
+
+    BN_mul (proof.tau, proof.tau, proof.chl, bn_ctx);
+
+    BN_add (proof.tau, proof.tau, sigma);
 
     Range_Proof_print(proof);
     //BN_set_word (sum, 30);
@@ -344,6 +384,7 @@ void NIZK_Range_Init(Range_PP &pp,
     EC_POINT_free(D);
     EC_POINT_free(Cinvm_sum);
     BN_free(FOUR);
+    BN_free(x_r_sum);
     EC_POINT_free(Cinv);
     BN_vec_free(x);
     BN_vec_free(r);
