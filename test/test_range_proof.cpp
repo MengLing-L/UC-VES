@@ -17,14 +17,16 @@ void test_protocol()
     NIZK_Range_Instance_new(instance);
     Range_Witness witness;
     NIZK_Range_Witness_new(witness);
+    NIZK_Range_Setup(pp, 4);
+    
     Range_Proof proof;
     NIZK_Range_Proof_new(proof,pp);
 
-    NIZK_Range_Setup(pp, 4);
 
 
     //BN_random(witness.w);
     BN_set_word(witness.w, 200);
+    BN_set_word(witness.r, 200);
 
     NIZK_Range_Init(pp, instance, witness, proof);
 

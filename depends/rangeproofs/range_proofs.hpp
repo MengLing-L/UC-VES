@@ -78,8 +78,10 @@ void NIZK_Range_Proof_new(Range_Proof &proof, Range_PP &pp)
 {
     proof.delta = "";
     proof.chl = BN_new();
+    proof.c.resize(pp.VECTOR_LEN); 
     proof.z.resize(pp.VECTOR_LEN); 
     proof.t.resize(pp.VECTOR_LEN); 
+    ECP_vec_new(proof.c);
     BN_vec_new(proof.z); 
     BN_vec_new(proof.t);
 }
