@@ -208,9 +208,9 @@ void NIZK_Range_Prove(Range_PP &pp,
 
     //BN_set_word(B, uint64_t(pow(2, BN_LEN*8))); 
     BN_set_word(B, uint64_t(pow(2, 8))); 
-    BN_print(B, "B");
+    //BN_print(B, "B");
     BN_sub (x[0], B, witness.w); //B-x
-    BN_print(x[0], "B-x");
+    //BN_print(x[0], "B-x");
 
     BN_mul (sum, x[0], witness.w, bn_ctx); //x(B-x)
     //BN_mod (sum, sum, B, bn_ctx);
@@ -224,15 +224,15 @@ void NIZK_Range_Prove(Range_PP &pp,
     BN_set_word (x[1], 2);
     BN_set_word (x[2], 101);
     BN_set_word (x[3], 186);
-    if (BN_cmp(tmp_sum, sum) == 0){
+    /*if (BN_cmp(tmp_sum, sum) == 0){
         BN_print(x[1], "x[1]");
         BN_print(x[2], "x[2]");
         BN_print(x[3], "x[3]");
-    }
+    }*/
 
     BN_copy(r[0], witness.r);
     BN_set_negative(r[0], 1);
-    BN_print(r[0],"r[0]");
+    //BN_print(r[0],"r[0]");
 
     EC_POINT_copy(Cinv, instance.C);
     EC_POINT_invert(group, Cinv, bn_ctx);
@@ -242,7 +242,7 @@ void NIZK_Range_Prove(Range_PP &pp,
     vec_x[0] = BN_1; 
     vec_x[1] = B;
     EC_POINTs_mul(group, proof.c[0], NULL, 2, vec_A, vec_x, bn_ctx);// c^-1 g^B
-    ECP_print(proof.c[0], "proof.c[0]");
+    //ECP_print(proof.c[0], "proof.c[0]");
     
     for (int i=1; i < pp.VECTOR_LEN; i++){
         BN_random (r[i]);
@@ -281,7 +281,7 @@ void NIZK_Range_Prove(Range_PP &pp,
     vec_x[0] = BN_1;
     vec_x[1] = BN_1;
     EC_POINTs_mul(group, Cinvm_sum, NULL, 2, vec_A, vec_x, bn_ctx); //c_1^-m_1 c_2^-m_2 
-    ECP_print(Cinvm_sum, "Cinvm_sum");
+    //ECP_print(Cinvm_sum, "Cinvm_sum");
 
     vec_A[0] = Cinvm_sum; 
     vec_A[1] = c_minv[3];
@@ -311,7 +311,7 @@ void NIZK_Range_Prove(Range_PP &pp,
     
     //Compute challenge
 
-    BN_random (proof.chl);
+    Hash_String_to_BN(proof.delta, proof.chl);
 
 
     for (int i=0; i < pp.VECTOR_LEN; i++){
@@ -488,12 +488,13 @@ bool NIZK_Range_Verify(Range_PP &pp,
     
     if (Validity) 
     { 
-        cout<< "Proof accepts >>>" << endl; 
-        
+        cout<< "Range Proof accepts >>>" << endl; 
+        cout<< "H({d_i}i=0..3, d): " << proof.delta << endl;
+        cout<< "H({f_i}i=0..3, f)" << res << endl;
     }
     else 
     {
-        cout<< "Proof rejects >>>" << endl; 
+        cout<< "Range Proof rejects >>>" << endl; 
         cout<< "res: " << res << endl;
         cout<< "proof.delta: " << proof.delta << endl;
        
