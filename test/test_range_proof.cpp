@@ -23,10 +23,10 @@ void test_protocol()
     NIZK_Range_Proof_new(proof,pp);
 
 
-
     //BN_random(witness.w);
     BN_set_word(witness.w, 200);
     BN_set_word(witness.r, 200);
+
 
     NIZK_Range_Prove(pp, instance, witness, proof);
 

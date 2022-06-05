@@ -172,7 +172,9 @@ void NIZK_Range_Prove(Range_PP &pp,
     vec_x[0] = witness.w; 
     vec_x[1] = witness.r;
     EC_POINTs_mul(group, instance.C, NULL, 2, vec_A, vec_x, bn_ctx);
-
+    BIGNUM *negone = BN_new();
+    BN_copy(negone, BN_1);
+    BN_set_negative(negone, 1);
     BIGNUM *sum = BN_new(); 
     BIGNUM *tmp_sum = BN_new();
     BIGNUM *tmp_sum0 = BN_new();
@@ -185,6 +187,7 @@ void NIZK_Range_Prove(Range_PP &pp,
     BIGNUM *x_r_sum = BN_new();
     EC_POINT *Cinv = EC_POINT_new(group);
     EC_POINT *D = EC_POINT_new(group);
+    EC_POINT *D_tmp = EC_POINT_new(group);
     EC_POINT *Cinvm_sum = EC_POINT_new(group);
     vector<BIGNUM *> x(pp.VECTOR_LEN);
     BN_vec_new(x);
@@ -228,6 +231,9 @@ void NIZK_Range_Prove(Range_PP &pp,
     }
 
     BN_copy(r[0], witness.r);
+    BN_set_negative(r[0], 1);
+    BN_print(r[0],"r[0]");
+
     EC_POINT_copy(Cinv, instance.C);
     EC_POINT_invert(group, Cinv, bn_ctx);
 
@@ -236,7 +242,8 @@ void NIZK_Range_Prove(Range_PP &pp,
     vec_x[0] = BN_1; 
     vec_x[1] = B;
     EC_POINTs_mul(group, proof.c[0], NULL, 2, vec_A, vec_x, bn_ctx);// c^-1 g^B
-
+    ECP_print(proof.c[0], "proof.c[0]");
+    
     for (int i=1; i < pp.VECTOR_LEN; i++){
         BN_random (r[i]);
         BN_mod (r[i], r[i], B, bn_ctx);
@@ -271,9 +278,10 @@ void NIZK_Range_Prove(Range_PP &pp,
 
     vec_A[0] = c_minv[1]; 
     vec_A[1] = c_minv[2];
-    vec_x[0] = BN_1; 
+    vec_x[0] = BN_1;
     vec_x[1] = BN_1;
     EC_POINTs_mul(group, Cinvm_sum, NULL, 2, vec_A, vec_x, bn_ctx); //c_1^-m_1 c_2^-m_2 
+    ECP_print(Cinvm_sum, "Cinvm_sum");
 
     vec_A[0] = Cinvm_sum; 
     vec_A[1] = c_minv[3];
@@ -287,9 +295,9 @@ void NIZK_Range_Prove(Range_PP &pp,
     vec_A[1] = instance.C;
     vec_x[0] = sigma; 
     vec_x[1] = tmp_sum1;
-    EC_POINTs_mul(group, D, NULL, 2, vec_A, vec_x, bn_ctx); //h^sigma c^4m_0
+    EC_POINTs_mul(group, D_tmp, NULL, 2, vec_A, vec_x, bn_ctx); //h^sigma c^4m_0
 
-    vec_A[0] = D; 
+    vec_A[0] = D_tmp; 
     vec_A[1] = Cinvm_sum;
     vec_x[0] = BN_1; 
     vec_x[1] = BN_1;
@@ -382,6 +390,7 @@ void NIZK_Range_Prove(Range_PP &pp,
     BN_free(sigma); 
     BN_free(B);
     EC_POINT_free(D);
+    EC_POINT_free(D_tmp);
     EC_POINT_free(Cinvm_sum);
     BN_free(FOUR);
     BN_free(x_r_sum);
