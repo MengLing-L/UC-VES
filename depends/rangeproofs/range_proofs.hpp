@@ -490,7 +490,7 @@ bool NIZK_Range_Verify(Range_PP &pp,
     { 
         cout<< "Range Proof accepts >>>" << endl; 
         cout<< "H({d_i}i=0..3, d): " << proof.delta << endl;
-        cout<< "H({f_i}i=0..3, f)" << res << endl;
+        cout<< "H({f_i}i=0..3, f): " << res << endl;
     }
     else 
     {
