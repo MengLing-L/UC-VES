@@ -174,7 +174,7 @@ void NIZK_DLOG_Setup(DLOG_PP &pp, EC_POINT* &h, EC_POINT* &EK, bool Sig_flag)
 void NIZK_DLOG_Prove_Compute_Chl(DLOG_PP &pp, 
                               DLOG_Instance &instance, 
                               DLOG_Witness &witness,
-                              string chl,  
+                              string &chl,  
                               DLOG_Proof &proof)
 {
     
@@ -223,7 +223,7 @@ void NIZK_DLOG_Prove_Compute_Chl(DLOG_PP &pp,
 void NIZK_DLOG_Prove_Compute_Proof(DLOG_PP &pp, 
                               DLOG_Instance &instance, 
                               DLOG_Witness &witness,  
-                              string chl, 
+                              string &chl, 
                               DLOG_Proof &proof)
 {
     
@@ -253,7 +253,7 @@ void NIZK_DLOG_Prove_Compute_Proof(DLOG_PP &pp,
 
 bool NIZK_DLOG_Verify(DLOG_PP &pp, 
                                DLOG_Instance &instance,
-                               string chl, 
+                               string &chl, 
                                DLOG_Proof &proof)
 {
     // initialize the transcript with instance 
