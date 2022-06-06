@@ -141,6 +141,10 @@ void NIZK_DLOG_Setup(DLOG_PP &pp,EC_POINT* &g, EC_POINT* &h, EC_POINT* &EK)
     EC_POINT_copy(pp.h, h);
     //Hash_ECP_to_ECP(pp.g, pp.h);
     EC_POINT_copy(pp.EK, EK);
+
+    #ifdef DEBUG
+    DLOG_PP_print(pp); 
+    #endif
 }
 
 
@@ -161,7 +165,9 @@ void NIZK_DLOG_Prove(DLOG_PP &pp,
     EC_POINT *Y2 = EC_POINT_new(group);
 
     EC_POINT_mul(group, Y1, phi_w, pp.h, phi_gamma, bn_ctx); 
-    EC_POINT_mul(group, Y2, NULL, pp.EK, phi_gamma, bn_ctx); 
+    ECP_print(Y1, "Y1");
+    EC_POINT_mul(group, Y2, NULL, pp.EK, phi_gamma, bn_ctx);
+    ECP_print(Y2, "Y2"); 
 
     // update the transcript 
     proof.chl += ECP_ep2string(Y1) + ECP_ep2string(Y2); 
@@ -219,12 +225,14 @@ bool NIZK_DLOG_Verify(DLOG_PP &pp,
     vec_x[1] = proof.z1;
     vec_x[2] = proof.z2;
     EC_POINTs_mul(group, Y1, NULL, 3, vec_A, vec_x, bn_ctx);  
+    ECP_print(Y1, "Y1");
 
     vec_A[0] = instance.V; 
     vec_A[1] = pp.EK;
     vec_x[0] = e; 
     vec_x[1] = proof.z2;
     EC_POINTs_mul(group, Y2, NULL, 2, vec_A, vec_x, bn_ctx);  
+    ECP_print(Y2, "Y2");
 
     string res = "";
     res += ECP_ep2string(Y1) + ECP_ep2string(Y2);
