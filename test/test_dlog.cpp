@@ -35,7 +35,7 @@ void test_protocol()
     NIZK_DLOG_Instance_new(dlog_instance);
     DLOG_Witness dlog_witness;
     NIZK_DLOG_Witness_new(dlog_witness);
-    NIZK_DLOG_Setup(dlog_pp, pp.h, pp.g, keypair.pk);
+    NIZK_DLOG_Setup(dlog_pp, pp.h, keypair.pk);
     
     DLOG_Proof dlog_proof;
     NIZK_DLOG_Proof_new(dlog_proof);
@@ -60,6 +60,7 @@ void test_protocol()
     EC_POINT_copy(dlog_instance.V, CT.X);
 
     NIZK_DLOG_Prove(dlog_pp, dlog_instance, dlog_witness, dlog_proof);
+    NIZK_DLOG_Verify(dlog_pp, dlog_instance, dlog_proof);
 
  
     Twisted_ElGamal_PP_free(pp); 

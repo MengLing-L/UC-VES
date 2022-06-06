@@ -135,10 +135,10 @@ void DLOG_Proof_deserialize(DLOG_Proof &proof, ifstream &fin)
 
 
 /* Setup algorithm: do nothing */ 
-void NIZK_DLOG_Setup(DLOG_PP &pp,EC_POINT* &g, EC_POINT* &h, EC_POINT* &EK)
+void NIZK_DLOG_Setup(DLOG_PP &pp, EC_POINT* &h, EC_POINT* &EK)
 { 
-    EC_POINT_copy(pp.g, g); 
-    EC_POINT_copy(pp.h, h);
+    EC_POINT_copy(pp.g, h); 
+    EC_POINT_copy(pp.h, generator);
     //Hash_ECP_to_ECP(pp.g, pp.h);
     EC_POINT_copy(pp.EK, EK);
 
