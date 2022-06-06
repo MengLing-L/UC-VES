@@ -164,7 +164,14 @@ void NIZK_DLOG_Prove(DLOG_PP &pp,
     EC_POINT *Y1 = EC_POINT_new(group);
     EC_POINT *Y2 = EC_POINT_new(group);
 
-    EC_POINT_mul(group, Y1, phi_w, pp.h, phi_gamma, bn_ctx); 
+    //EC_POINT_mul(group, Y1, phi_w, pp.h, phi_gamma, bn_ctx); 
+    const EC_POINT *vec_A[2]; 
+    const BIGNUM *vec_x[2];
+    vec_A[0] = pp.g; 
+    vec_A[1] = pp.h; 
+    vec_x[0] = phi_w; 
+    vec_x[1] = phi_gamma; 
+    EC_POINTs_mul(group, Y1, NULL, 2, vec_A, vec_x, bn_ctx); // Y1 = g^p_s h^p_beta
     ECP_print(Y1, "Y1");
     EC_POINT_mul(group, Y2, NULL, pp.EK, phi_gamma, bn_ctx);
     ECP_print(Y2, "Y2"); 
