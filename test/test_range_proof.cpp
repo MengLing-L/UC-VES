@@ -28,9 +28,13 @@ void test_protocol()
     BN_set_word(witness.r, 200);
 
 
-    NIZK_Range_Prove(pp, instance, witness, proof);
+    string chl = "";
+    NIZK_Range_Prove_Compute_Chl(pp, instance, witness, chl, proof);
 
-    NIZK_Range_Verify(pp, instance, witness, proof);
+    NIZK_Range_Prove_Compute_Proof(pp, instance, witness, chl, proof);
+
+
+    NIZK_Range_Verify(pp, instance, witness, chl, proof);
 
     NIZK_Range_PP_free(pp);
     NIZK_Range_Instance_free(instance);
