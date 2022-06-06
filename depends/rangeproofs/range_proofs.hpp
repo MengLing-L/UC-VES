@@ -441,11 +441,12 @@ void NIZK_Range_Prove_Compute_Proof(Range_PP &pp,
 }
 
 
-bool NIZK_Range_Verify(Range_PP &pp, 
+void NIZK_Range_Verify(Range_PP &pp, 
                             Range_Instance &instance, 
                             Range_Witness &witness, 
                             string &chl,
-                            Range_Proof &proof){
+                            Range_Proof &proof,
+                            string &res){
 
     const EC_POINT *vec_A[3]; 
     const BIGNUM *vec_x[3];
@@ -516,7 +517,7 @@ bool NIZK_Range_Verify(Range_PP &pp,
     vec_x[1] = BN_1;
     EC_POINTs_mul(group, F, NULL, 2, vec_A, vec_x, bn_ctx);
 
-    string res = "";
+    //string res = "";
 
     for (int i=0; i < pp.VECTOR_LEN; i++){
         res = res + ECP_ep2string(f[i]);
@@ -525,7 +526,7 @@ bool NIZK_Range_Verify(Range_PP &pp,
     res = res + ECP_ep2string(F);
 
 
-    bool Validity = (res == chl);
+    /*bool Validity = (res == chl);
 
 
     #ifdef DEBUG
@@ -543,7 +544,7 @@ bool NIZK_Range_Verify(Range_PP &pp,
         cout<< "H({f_i}i=0..3, f): " << chl << endl;
        
     }
-    #endif
+    #endif*/
 
     ECP_vec_free (c_invchl);
     ECP_vec_free (f);
@@ -553,7 +554,7 @@ bool NIZK_Range_Verify(Range_PP &pp,
     BN_free (FOUR_z_0);
     BN_free (FOUR);
     BN_free (e);
-    return Validity;
+    //return Validity;
 
 }
 

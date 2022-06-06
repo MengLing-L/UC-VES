@@ -13,3 +13,7 @@ include_directories(${OPENSSL_INCLUDE_DIR})
 add_executable(test_range_proof test/test_range_proof.cpp)
 
 target_link_libraries(test_range_proof ${OPENSSL_LIBRARIES})
+
+add_executable(test_dlog test/test_dlog.cpp)
+
+target_link_libraries(test_dlog ${OPENSSL_LIBRARIES})

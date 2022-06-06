@@ -251,10 +251,11 @@ void NIZK_DLOG_Prove_Compute_Proof(DLOG_PP &pp,
     Check if PI is a valid NIZK proof for statenent (G1^w = H1 and G2^w = H2)
 */
 
-bool NIZK_DLOG_Verify(DLOG_PP &pp, 
+void NIZK_DLOG_Verify(DLOG_PP &pp, 
                                DLOG_Instance &instance,
                                string &chl, 
-                               DLOG_Proof &proof)
+                               DLOG_Proof &proof,
+                               string &res)
 {
     // initialize the transcript with instance 
 
@@ -295,14 +296,13 @@ bool NIZK_DLOG_Verify(DLOG_PP &pp,
         EC_POINTs_mul(group, Y3, NULL, 2, vec_A, vec_x, bn_ctx); 
     }
 
-    string res = "";
     res += ECP_ep2string(Y1) + ECP_ep2string(Y2);
 
     if(pp.Sig_flag){
         res += ECP_ep2string(Y3);
     }
 
-    bool Validity = (res == chl); 
+    /*bool Validity = (res == chl); 
 
     #ifdef DEBUG
     
@@ -316,7 +316,7 @@ bool NIZK_DLOG_Verify(DLOG_PP &pp,
         cout<< "chl: " << chl << endl;
         cout<< "H(*): " << res << endl;
     }
-    #endif
+    #endif*/
 
     BN_free(e); 
 
@@ -324,7 +324,7 @@ bool NIZK_DLOG_Verify(DLOG_PP &pp,
     EC_POINT_free(Y2);
     EC_POINT_free(Y3);
 
-    return Validity;
+    //return Validity;
 }
 
 #endif
