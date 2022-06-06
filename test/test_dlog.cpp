@@ -146,9 +146,12 @@ void test_protocol2()
     
     string res = "";
     NIZK_DLOG_Verify(dlog_pp, dlog_instance,chl, dlog_proof, res);
-
-    cout << "chl: " << chl << endl;
-    cout << "res: " << res << endl;
+	
+    if (res == chl){
+	cout << "DLOG proof accept." << endl;
+    	cout << "chl: " << chl << endl;
+    	cout << "res: " << res << endl;
+    }
 
  
     Twisted_ElGamal_PP_free(pp); 

@@ -37,8 +37,11 @@ void test_protocol()
     string res = "";
     NIZK_Range_Verify(pp, instance, witness, chl, proof, res);
 
-    cout << "chl: " << chl << endl;
-    cout << "res: " << res << endl;
+    if (res == chl){
+	cout << "Range proof accept." << endl;
+    	cout << "chl: " << chl << endl;
+    	cout << "res: " << res << endl;
+    }
 
     NIZK_Range_PP_free(pp);
     NIZK_Range_Instance_free(instance);
