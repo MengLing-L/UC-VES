@@ -60,8 +60,10 @@ void test_protocol()
     EC_POINT_copy(dlog_instance.U, CT.Y);
     EC_POINT_copy(dlog_instance.V, CT.X);
 
-    NIZK_DLOG_Prove(dlog_pp, dlog_instance, dlog_witness, dlog_proof);
-    NIZK_DLOG_Verify(dlog_pp, dlog_instance, dlog_proof);
+    string chl = "";
+    NIZK_DLOG_Prove_Compute_Chl(dlog_pp, dlog_instance, dlog_witness, chl, dlog_proof);
+    NIZK_DLOG_Prove_Compute_Proof(dlog_pp, dlog_instance, dlog_witness, chl, dlog_proof);
+    NIZK_DLOG_Verify(dlog_pp, dlog_instance,chl, dlog_proof);
 
  
     Twisted_ElGamal_PP_free(pp); 
@@ -134,8 +136,10 @@ void test_protocol2()
     EC_POINT_mul(group, dlog_instance.B, NULL, pp.g, m, bn_ctx);
     EC_POINT_mul(group, dlog_instance.A, NULL, dlog_instance.B, dlog_witness.w, bn_ctx);
 
-    NIZK_DLOG_Prove(dlog_pp, dlog_instance, dlog_witness, dlog_proof);
-    NIZK_DLOG_Verify(dlog_pp, dlog_instance, dlog_proof);
+    string chl = "";
+    NIZK_DLOG_Prove_Compute_Chl(dlog_pp, dlog_instance, dlog_witness, chl, dlog_proof);
+    NIZK_DLOG_Prove_Compute_Proof(dlog_pp, dlog_instance, dlog_witness, chl, dlog_proof);
+    NIZK_DLOG_Verify(dlog_pp, dlog_instance,chl, dlog_proof);
 
  
     Twisted_ElGamal_PP_free(pp); 

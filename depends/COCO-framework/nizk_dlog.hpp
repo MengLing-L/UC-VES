@@ -39,7 +39,9 @@ struct DLOG_Proof
 {
     
     BIGNUM *z1, *z2;
-    string chl;    
+    //string chl;    
+    BIGNUM *phi_w,*phi_gamma;  
+
 };
 
 void NIZK_DLOG_PP_new(DLOG_PP &pp){
@@ -92,7 +94,8 @@ void NIZK_DLOG_Proof_new(DLOG_Proof &proof)
 {
     proof.z1 = BN_new();
     proof.z2 = BN_new();
-    proof.chl = "";
+    proof.phi_w = BN_new();
+    proof.phi_gamma = BN_new();
 }
 
 void NIZK_DLOG_Proof_free(DLOG_Proof &proof)
@@ -134,7 +137,7 @@ void DLOG_Proof_print(DLOG_Proof &proof)
     cout << "NIZKPoK for DLOG >>> " << endl; 
     BN_print(proof.z1,  "proof.z1");
     BN_print(proof.z2,  "proof.z2");
-    cout << "proof.chl: " << proof.chl << endl;
+    //cout << "chl: " << chl << endl;
     
 }
 
@@ -168,18 +171,18 @@ void NIZK_DLOG_Setup(DLOG_PP &pp, EC_POINT* &h, EC_POINT* &EK, bool Sig_flag)
 }
 
 
-// Generate a NIZK proof PI for g1^w = h1 and g2^w = h2
-void NIZK_DLOG_Prove(DLOG_PP &pp, 
+void NIZK_DLOG_Prove_Compute_Chl(DLOG_PP &pp, 
                               DLOG_Instance &instance, 
-                              DLOG_Witness &witness,  
+                              DLOG_Witness &witness,
+                              string chl,  
                               DLOG_Proof &proof)
 {
     
     // begin to generate proof
-    BIGNUM *phi_w = BN_new(); 
-    BN_random(phi_w); 
-    BIGNUM *phi_gamma = BN_new(); 
-    BN_random(phi_gamma);
+    //BIGNUM *phi_w = BN_new(); 
+    BN_random(proof.phi_w); 
+    //BIGNUM *phi_gamma = BN_new(); 
+    BN_random(proof.phi_gamma);
 
     EC_POINT *Y1 = EC_POINT_new(group);
     EC_POINT *Y2 = EC_POINT_new(group);
@@ -190,45 +193,58 @@ void NIZK_DLOG_Prove(DLOG_PP &pp,
     const BIGNUM *vec_x[2];
     vec_A[0] = pp.g; 
     vec_A[1] = pp.h; 
-    vec_x[0] = phi_w; 
-    vec_x[1] = phi_gamma; 
+    vec_x[0] = proof.phi_w; 
+    vec_x[1] = proof.phi_gamma; 
     EC_POINTs_mul(group, Y1, NULL, 2, vec_A, vec_x, bn_ctx); // Y1 = g^p_s h^p_beta
     
-    EC_POINT_mul(group, Y2, NULL, pp.EK, phi_gamma, bn_ctx);
+    EC_POINT_mul(group, Y2, NULL, pp.EK, proof.phi_gamma, bn_ctx);
     
     if(pp.Sig_flag){
-        EC_POINT_mul(group, Y3, NULL, instance.B, phi_w, bn_ctx);
+        EC_POINT_mul(group, Y3, NULL, instance.B, proof.phi_w, bn_ctx);
     } 
 
-    // update the transcript 
-    proof.chl += ECP_ep2string(Y1) + ECP_ep2string(Y2); 
+    
+    chl += ECP_ep2string(Y1) + ECP_ep2string(Y2); 
 
     if(pp.Sig_flag){
-        proof.chl += ECP_ep2string(Y3);
+        chl += ECP_ep2string(Y3);
     }
-    // compute the challenge
+    
+
+    #ifdef DEBUG
+    DLOG_Proof_print(proof); 
+    #endif
+ 
+    EC_POINT_free(Y1);
+    EC_POINT_free(Y2);
+    EC_POINT_free(Y3);
+}
+
+void NIZK_DLOG_Prove_Compute_Proof(DLOG_PP &pp, 
+                              DLOG_Instance &instance, 
+                              DLOG_Witness &witness,  
+                              string chl, 
+                              DLOG_Proof &proof)
+{
+    
 
     BIGNUM *e = BN_new(); 
-    Hash_String_to_BN(proof.chl, e); // V's challenge in Zq; 
+    Hash_String_to_BN(chl, e); // V's challenge in Zq; 
 
-    // compute the response
+    
     BN_mul (proof.z1, e, witness.w, bn_ctx); 
-    BN_sub (proof.z1, phi_w, proof.z1);
+    BN_sub (proof.z1, proof.phi_w, proof.z1);
 
     BN_mul (proof.z2, e, witness.gamma, bn_ctx); 
-    BN_sub (proof.z2, phi_gamma, proof.z2);
+    BN_sub (proof.z2, proof.phi_gamma, proof.z2);
 
 
     #ifdef DEBUG
     DLOG_Proof_print(proof); 
     #endif
 
-    BN_free(phi_w); 
-    BN_free(phi_gamma); 
+    
     BN_free(e);
-    EC_POINT_free(Y1);
-    EC_POINT_free(Y2);
-    EC_POINT_free(Y3);
 }
 
 /*
@@ -237,6 +253,7 @@ void NIZK_DLOG_Prove(DLOG_PP &pp,
 
 bool NIZK_DLOG_Verify(DLOG_PP &pp, 
                                DLOG_Instance &instance,
+                               string chl, 
                                DLOG_Proof &proof)
 {
     // initialize the transcript with instance 
@@ -248,7 +265,7 @@ bool NIZK_DLOG_Verify(DLOG_PP &pp,
     
     // compute the challenge
     BIGNUM *e = BN_new(); 
-    Hash_String_to_BN(proof.chl, e); // V's challenge in Zq; 
+    Hash_String_to_BN(chl, e); // V's challenge in Zq; 
 
      
     const EC_POINT *vec_A[3]; 
@@ -285,19 +302,19 @@ bool NIZK_DLOG_Verify(DLOG_PP &pp,
         res += ECP_ep2string(Y3);
     }
 
-    bool Validity = (res == proof.chl); 
+    bool Validity = (res == chl); 
 
     #ifdef DEBUG
     
     if (Validity){ 
         cout<< "DLOG Proof Accepts >>>" << endl; 
-        cout<< "proof.chl: " << proof.chl << endl;
-        cout<< "H(Y1|Y2): " << res << endl;
+        cout<< "chl: " << chl << endl;
+        cout<< "H(*): " << res << endl;
     }
     else{
         cout<< "DLOG Proof Rejects >>>" << endl; 
-        cout<< "proof.chl: " << proof.chl << endl;
-        cout<< "H(Y1|Y2): " << res << endl;
+        cout<< "chl: " << chl << endl;
+        cout<< "H(*): " << res << endl;
     }
     #endif
 
