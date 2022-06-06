@@ -495,8 +495,8 @@ bool NIZK_Range_Verify(Range_PP &pp,
     else 
     {
         cout<< "Range Proof rejects >>>" << endl; 
-        cout<< "res: " << res << endl;
-        cout<< "proof.delta: " << proof.delta << endl;
+        cout<< "H({d_i}i=0..3, d): " << res << endl;
+        cout<< "H({f_i}i=0..3, f): " << proof.delta << endl;
        
     }
     #endif
