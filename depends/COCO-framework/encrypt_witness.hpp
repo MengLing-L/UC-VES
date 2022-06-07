@@ -51,7 +51,8 @@ void NIZK_Witness_Encryption_AndR_PP_free(Witness_Encryption_AndR_PP &pp)
 }
 
 void NIZK_Witness_Encryption_AndR_Instance_new(Witness_Encryption_AndR_Instance &instance)
-{   
+{
+    instance.dlog_instance.resize(DLOG_SIZE);
     for (int i=0; i < DLOG_SIZE; i++){
         NIZK_DLOG_Instance_new(instance.dlog_instance[i]);
     }
@@ -65,7 +66,8 @@ void NIZK_Witness_Encryption_AndR_Instance_free(Witness_Encryption_AndR_Instance
 }
 
 void NIZK_Witness_Encryption_AndR_Witness_new(Witness_Encryption_AndR_Witness &witness)
-{
+{ 
+    witness.dlog_witness.resize(DLOG_SIZE);
     for (int i=0; i < DLOG_SIZE; i++){
         NIZK_DLOG_Witness_new(witness.dlog_witness[i]);
     }
@@ -80,6 +82,7 @@ void NIZK_Witness_Encryption_AndR_Witness_free(Witness_Encryption_AndR_Witness &
 
 void NIZK_Witness_Encryption_AndR_Proof_new(Witness_Encryption_AndR_Proof &proof)
 {
+    proof.dlog_proof.resize(DLOG_SIZE);
     for (int i=0; i < DLOG_SIZE; i++){
         NIZK_DLOG_Proof_new(proof.dlog_proof[i]);
     }

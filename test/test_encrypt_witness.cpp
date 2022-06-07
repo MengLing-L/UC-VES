@@ -42,9 +42,13 @@ void test_protocol()
     Witness_Encryption_AndR_Proof proof;
     NIZK_Witness_Encryption_AndR_Proof_new(proof);
 
+    BN_hex2bn(&witness.dlog_witness[0].w, "65BB42E0");
+    BN_hex2bn(&witness.dlog_witness[0].gamma, "65BB42E6");
+    BN_hex2bn(&witness.dlog_witness[1].w, "69BB42E0");
+    BN_hex2bn(&witness.dlog_witness[1].gamma, "67BB42E0");
+    BN_hex2bn(&witness.dlog_witness[2].w, "65AB42E6");
+    BN_hex2bn(&witness.dlog_witness[2].gamma, "6CBB42E6");
     for (int i=0; i < 3; i++){
-        BN_hex2bn(&witness.dlog_witness[i].w, "65BB42E0");
-        BN_hex2bn(&witness.dlog_witness[i].gamma, "65BB42E6");
         BN_mod(witness.dlog_witness[i].w, witness.dlog_witness[i].w, enc_pp.BN_MSG_SIZE, bn_ctx);
         BN_print(witness.dlog_witness[i].w, "dlog_witness.w"); 
         Twisted_ElGamal_Enc(enc_pp, keypair.pk, witness.dlog_witness[i].w, witness.dlog_witness[i].gamma, CT);
