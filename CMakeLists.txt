@@ -17,3 +17,7 @@ target_link_libraries(test_range_proof ${OPENSSL_LIBRARIES})
 add_executable(test_dlog test/test_dlog.cpp)
 
 target_link_libraries(test_dlog ${OPENSSL_LIBRARIES})
+
+add_executable(test_encrypt_witness test/test_encrypt_witness.cpp)
+
+target_link_libraries(test_encrypt_witness ${OPENSSL_LIBRARIES})
