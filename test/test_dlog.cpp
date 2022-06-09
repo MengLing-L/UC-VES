@@ -62,6 +62,7 @@ void test_protocol()
 
     string chl = "";
     NIZK_DLOG_Prove_Compute_Chl(dlog_pp, dlog_instance, dlog_witness, chl, dlog_proof);
+
     NIZK_DLOG_Prove_Compute_Proof(dlog_pp, dlog_instance, dlog_witness, chl, dlog_proof);
 
     string res = "";

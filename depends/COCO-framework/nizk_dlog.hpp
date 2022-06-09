@@ -247,6 +247,23 @@ void NIZK_DLOG_Prove_Compute_Proof(DLOG_PP &pp,
     BN_free(e);
 }
 
+
+void NIZK_DLOG_Simulate_Proof(DLOG_PP &pp, 
+                              DLOG_Instance &instance,  
+                              string &chl, 
+                              DLOG_Proof &proof)
+{
+    
+    BN_random (proof.z1);
+    BN_random (proof.z2);
+
+    #ifdef DEBUG
+    DLOG_Proof_print(proof); 
+    #endif
+
+    
+}
+
 /*
     Check if PI is a valid NIZK proof for statenent (G1^w = H1 and G2^w = H2)
 */
