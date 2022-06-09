@@ -110,16 +110,17 @@ void NIZK_Simulation_Encrypt_Signature_Prove_Compute_Chl(Simulation_Encrypt_Sign
                             string &chl, 
                             Simulation_Encrypt_Signature_Proof &proof){
     
-    NIZK_DLOG_Prove_Compute_Chl(pp.dlog_pp, instance.dlog_instance, witness.dlog_witness, chl, proof.dlog_proof);
+        NIZK_DLOG_Prove_Compute_Chl(pp.dlog_pp, instance.dlog_instance, witness.dlog_witness, chl, proof.dlog_proof);
 
 }
 
 void NIZK_Simulation_Encrypt_Signature_Simulate_Proof(Simulation_Encrypt_Signature_PP &pp, 
                             Simulation_Encrypt_Signature_Instance &instance,
+                            Simulation_Encrypt_Signature_Witness &witness,
                             string &chl, 
                             Simulation_Encrypt_Signature_Proof &proof){
     
-    NIZK_DLOG_Simulate_Proof(pp.dlog_pp, instance.dlog_instance, chl, proof.dlog_proof);
+    NIZK_DLOG_Prove_Compute_Proof(pp.dlog_pp, instance.dlog_instance, witness.dlog_witness, chl, proof.dlog_proof);
 
 }
 
