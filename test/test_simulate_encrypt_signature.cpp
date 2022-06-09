@@ -66,8 +66,8 @@ void test_protocol()
     //BN_set_word(witness.r, 200);
 
 
-    BN_random(m);
-    string chl = BN_bn2string(m);
+    string chl = "";
+    NIZK_Simulation_Encrypt_Signature_Prove_Compute_Chl(pp, instance, witness, chl, proof);
     NIZK_Simulation_Encrypt_Signature_Simulate_Proof(pp, instance, chl, proof);
 
 
