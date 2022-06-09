@@ -234,10 +234,10 @@ void NIZK_Range_Prove_Compute_Chl(Range_PP &pp,
     //BN_mod (sum, sum, B, bn_ctx);
 
     //BN_set_word (sum, 30);
-    //BN_print(sum, "sum");
+    BN_print(sum, "sum");
     //BN_mul (tmp_sum0, proof.x[0], proof.x[0], bn_ctx); // x_0^2
                 
-
+/*
     while(BN_cmp(proof.x[1], sum) == -1){
         BN_mul (tmp_sum1, proof.x[1], proof.x[1], bn_ctx); //x_1^2
     //  BN_mod (tmp_sum1, tmp_sum1, B, bn_ctx);
@@ -270,16 +270,22 @@ void NIZK_Range_Prove_Compute_Chl(Range_PP &pp,
         }
         BN_add (proof.x[1], proof.x[1], BN_1);
         BN_set_word (proof.x[2], 0);
-    }
+    }*/
 
-    /*BN_set_word (proof.x[1], 2);
-    BN_set_word (proof.x[2], 101);
-    BN_set_word (proof.x[3], 186);*/
-    /*if (BN_cmp(tmp_sum, sum) == 0){
+    BN_set_word (proof.x[1], 2504069926);
+    BN_set_word (proof.x[2], 869357514);
+    BN_set_word (proof.x[3], 3067414581);
+    BN_mul (tmp_sum1, proof.x[1], proof.x[1], bn_ctx); //x_1^2
+    BN_mul (tmp_sum2, proof.x[2], proof.x[2], bn_ctx); //x_2^2
+    BN_mul (tmp_sum3, proof.x[3], proof.x[3], bn_ctx); //x_3^2
+    BN_add (tmp_sum, tmp_sum1, tmp_sum2); //x_1^2 + x_2^2
+    BN_add (tmp_sum, tmp_sum, tmp_sum3); //x_3^2 + x_1^2 + x_2^2
+    BN_print(tmp_sum, "tmp_sum");
+    if (BN_cmp(tmp_sum, sum) == 0){
         BN_print(proof.x[1], "proof.x[1]");
         BN_print(proof.x[2], "proof.x[2]");
         BN_print(proof.x[3], "proof.x[3]");
-    }*/
+    }
 
     BN_copy(proof.r[0], witness.r);
     BN_set_negative(proof.r[0], 1);

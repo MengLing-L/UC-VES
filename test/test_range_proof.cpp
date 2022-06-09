@@ -43,7 +43,7 @@ void test_protocol()
 
     //BN_random(witness.w);
 
-    BN_hex2bn(&witness.w, "65BB42E0");
+    BN_hex2bn(&witness.w, "55BB42E0");
     BN_hex2bn(&witness.r, "65BB42E6");
 
     Twisted_ElGamal_Enc(enc_pp, keypair.pk, witness.w, witness.r, CT);
