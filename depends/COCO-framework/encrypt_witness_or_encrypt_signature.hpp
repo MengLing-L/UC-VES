@@ -163,10 +163,10 @@ bool Encrypt_witNess_or_Encrypt_signature_Verify(Encrypt_witNess_or_Encrypt_sign
                             string &chl0,
                             Encrypt_witNess_or_Encrypt_signature_Proof &proof,
                             string &res){
+    Simulation_Encrypt_Signature_Verify(pp.sim_sig_pp, instance.sim_sig_instance, chl1, proof.sim_sig_proof, res);
 
     Witness_Encryption_AndR_Verify(pp.enc_witness_pp, instance.enc_witness_instance, chl0, proof.enc_witness_proof, res);
     
-    Simulation_Encrypt_Signature_Verify(pp.sim_sig_pp, instance.sim_sig_instance, chl1, proof.sim_sig_proof, res);
 
 
     /*BIGNUM *e = BN_new();

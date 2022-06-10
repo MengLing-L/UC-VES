@@ -98,9 +98,19 @@ void test_protocol()
     string res = "";
     Encrypt_witNess_or_Encrypt_signature_Verify(pp, instance, chl, chl1, chl0, proof, res);
 
+    bool Validity = (res == chl); 
 
-    cout << "chl: " << chl << endl;
-    cout << "res: " << res << endl;
+    
+    if (Validity){ 
+        cout<< "DLOG Proof Accepts >>>" << endl; 
+        cout<< "chl: " << chl << endl;
+        cout<< "H(*): " << res << endl;
+    }
+    else{
+        cout<< "DLOG Proof Rejects >>>" << endl; 
+        cout<< "chl: " << chl << endl;
+        cout<< "H(*): " << res << endl;
+    }
     
     Twisted_ElGamal_PP_free(enc_pp); 
     Twisted_ElGamal_KP_free(keypair); 
