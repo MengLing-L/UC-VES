@@ -12,128 +12,116 @@ this hpp implements NIZKPoK for discrete logarithm equality
 #include "../common/hash.hpp"
 #include "../common/print.hpp"
 #include "../common/routines.hpp"
-#include "../COCO-framework/nizk_dlog.hpp"
+#include "../COCO-framework/sigma_dlog.hpp"
 #include "../twisted_elgamal/twisted_elgamal.hpp"
 
-const size_t DLOG_SIZE = 3;
+const size_t SIGMA_DLOG_SIZE = 3;
 
 struct Simulation_Encrypt_Signature_PP
 {
-    DLOG_PP dlog_pp;
+    SIGMA_DLOG_PP dlog_pp;
 };
 
 struct Simulation_Encrypt_Signature_Instance
 { 
-    DLOG_Instance dlog_instance;
+    SIGMA_DLOG_Instance dlog_instance;
 }; 
 
 struct Simulation_Encrypt_Signature_Witness
 {
-    DLOG_Witness dlog_witness;
+    SIGMA_DLOG_Witness dlog_witness;
 }; 
  
 struct Simulation_Encrypt_Signature_Proof
 {   
-    DLOG_Proof dlog_proof;
+    SIGMA_DLOG_Proof dlog_proof;
     
 };
 
-void NIZK_Simulation_Encrypt_Signature_PP_new(Simulation_Encrypt_Signature_PP &pp){
-    NIZK_DLOG_PP_new(pp.dlog_pp);
+void Simulation_Encrypt_Signature_PP_new(Simulation_Encrypt_Signature_PP &pp){
+    SIGMA_DLOG_PP_new(pp.dlog_pp);
 }
 
-void NIZK_Simulation_Encrypt_Signature_PP_free(Simulation_Encrypt_Signature_PP &pp)
+void Simulation_Encrypt_Signature_PP_free(Simulation_Encrypt_Signature_PP &pp)
 { 
-    NIZK_DLOG_PP_free(pp.dlog_pp);
+    SIGMA_DLOG_PP_free(pp.dlog_pp);
 }
 
-void NIZK_Simulation_Encrypt_Signature_Instance_new(Simulation_Encrypt_Signature_Instance &instance)
+void Simulation_Encrypt_Signature_Instance_new(Simulation_Encrypt_Signature_Instance &instance)
 {   
-    NIZK_DLOG_Instance_new(instance.dlog_instance);
+    SIGMA_DLOG_Instance_new(instance.dlog_instance);
 }
 
-void NIZK_Simulation_Encrypt_Signature_Instance_free(Simulation_Encrypt_Signature_Instance &instance)
+void Simulation_Encrypt_Signature_Instance_free(Simulation_Encrypt_Signature_Instance &instance)
 {
-    NIZK_DLOG_Instance_free(instance.dlog_instance);
+    SIGMA_DLOG_Instance_free(instance.dlog_instance);
 }
 
-void NIZK_Simulation_Encrypt_Signature_Witness_new(Simulation_Encrypt_Signature_Witness &witness)
+void Simulation_Encrypt_Signature_Witness_new(Simulation_Encrypt_Signature_Witness &witness)
 { 
 
-    NIZK_DLOG_Witness_new(witness.dlog_witness);
+    SIGMA_DLOG_Witness_new(witness.dlog_witness);
 }
 
-void NIZK_Simulation_Encrypt_Signature_Witness_free(Simulation_Encrypt_Signature_Witness &witness)
+void Simulation_Encrypt_Signature_Witness_free(Simulation_Encrypt_Signature_Witness &witness)
 {
-    NIZK_DLOG_Witness_free(witness.dlog_witness);
+    SIGMA_DLOG_Witness_free(witness.dlog_witness);
 }
 
-void NIZK_Simulation_Encrypt_Signature_Proof_new(Simulation_Encrypt_Signature_Proof &proof)
+void Simulation_Encrypt_Signature_Proof_new(Simulation_Encrypt_Signature_Proof &proof)
 {
-    NIZK_DLOG_Proof_new(proof.dlog_proof);
+    SIGMA_DLOG_Proof_new(proof.dlog_proof);
 }
 
-void NIZK_Simulation_Encrypt_Signature_Proof_free(Simulation_Encrypt_Signature_Proof &proof)
+void Simulation_Encrypt_Signature_Proof_free(Simulation_Encrypt_Signature_Proof &proof)
 {
-    NIZK_DLOG_Proof_free(proof.dlog_proof);
+    SIGMA_DLOG_Proof_free(proof.dlog_proof);
 }
 
 void Simulation_Encrypt_Signature_PP_print(Simulation_Encrypt_Signature_PP &pp)
 {
-    DLOG_PP_print(pp.dlog_pp);
+    SIGMA_DLOG_PP_print(pp.dlog_pp);
 }
 
 void Simulation_Encrypt_Signature_Instance_print(Simulation_Encrypt_Signature_Instance &instance)
 {
-    DLOG_Instance_print(instance.dlog_instance);
+    SIGMA_DLOG_Instance_print(instance.dlog_instance);
 } 
 
 void Simulation_Encrypt_Signature_Witness_print(Simulation_Encrypt_Signature_Witness &witness)
 {
-    DLOG_Witness_print(witness.dlog_witness); 
+    SIGMA_DLOG_Witness_print(witness.dlog_witness); 
 } 
 
 void Simulation_Encrypt_Signature_Proof_print(Simulation_Encrypt_Signature_Proof &proof)
 {
-    DLOG_Proof_print(proof.dlog_proof);
+    SIGMA_DLOG_Proof_print(proof.dlog_proof);
 }
 
 
 
-void NIZK_Simulation_Encrypt_Signature_Setup(Simulation_Encrypt_Signature_PP &pp, EC_POINT* &h, EC_POINT* &EK){
-    NIZK_DLOG_Setup(pp.dlog_pp, h, EK, true);
+void Simulation_Encrypt_Signature_Setup(Simulation_Encrypt_Signature_PP &pp, EC_POINT* &h, EC_POINT* &EK){
+    SIGMA_DLOG_Setup(pp.dlog_pp, h, EK, true);
 }
 
-void NIZK_Simulation_Encrypt_Signature_Prove_Compute_Chl(Simulation_Encrypt_Signature_PP &pp, 
-                            Simulation_Encrypt_Signature_Instance &instance, 
-                            Simulation_Encrypt_Signature_Witness &witness,
-                            string &chl, 
-                            Simulation_Encrypt_Signature_Proof &proof){
-    
-        NIZK_DLOG_Prove_Compute_Chl(pp.dlog_pp, instance.dlog_instance, witness.dlog_witness, chl, proof.dlog_proof);
 
-}
-
-void NIZK_Simulation_Encrypt_Signature_Simulate_Proof(Simulation_Encrypt_Signature_PP &pp, 
+void Simulation_Encrypt_Signature_Simulate_Proof(Simulation_Encrypt_Signature_PP &pp, 
                             Simulation_Encrypt_Signature_Instance &instance,
-                            Simulation_Encrypt_Signature_Witness &witness,
                             string &chl, 
                             Simulation_Encrypt_Signature_Proof &proof){
     
-    NIZK_DLOG_Prove_Compute_Proof(pp.dlog_pp, instance.dlog_instance, witness.dlog_witness, chl, proof.dlog_proof);
+    SIGMA_DLOG_Simulate_Proof(pp.dlog_pp, instance.dlog_instance, chl, proof.dlog_proof);
 
 }
 
 
-bool NIZK_Simulation_Encrypt_Signature_Verify(Simulation_Encrypt_Signature_PP &pp, 
+bool Simulation_Encrypt_Signature_Verify(Simulation_Encrypt_Signature_PP &pp, 
                             Simulation_Encrypt_Signature_Instance &instance, 
-                            Simulation_Encrypt_Signature_Witness &witness, 
                             string &chl, 
-                            Simulation_Encrypt_Signature_Proof &proof,
-                            string &res){
+                            Simulation_Encrypt_Signature_Proof &proof){
 
     
-    NIZK_DLOG_Verify(pp.dlog_pp, instance.dlog_instance, chl, proof.dlog_proof, res);
+    SIGMA_DLOG_Verify(pp.dlog_pp, instance.dlog_instance, chl, proof.dlog_proof);
 
 }
 

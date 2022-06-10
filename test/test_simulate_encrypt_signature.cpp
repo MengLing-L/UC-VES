@@ -31,16 +31,16 @@ void test_protocol()
     Twisted_ElGamal_CT_new(CT); 
 
     Simulation_Encrypt_Signature_PP pp;
-    NIZK_Simulation_Encrypt_Signature_PP_new(pp);
-    NIZK_Simulation_Encrypt_Signature_Setup(pp, enc_pp.h, keypair.pk);
+    Simulation_Encrypt_Signature_PP_new(pp);
+    Simulation_Encrypt_Signature_Setup(pp, enc_pp.h, keypair.pk);
     Simulation_Encrypt_Signature_Instance instance;
-    NIZK_Simulation_Encrypt_Signature_Instance_new(instance);
+    Simulation_Encrypt_Signature_Instance_new(instance);
     Simulation_Encrypt_Signature_Witness witness;
-    NIZK_Simulation_Encrypt_Signature_Witness_new(witness);
+    Simulation_Encrypt_Signature_Witness_new(witness);
     
     
     Simulation_Encrypt_Signature_Proof proof;
-    NIZK_Simulation_Encrypt_Signature_Proof_new(proof);
+    Simulation_Encrypt_Signature_Proof_new(proof);
 
     BN_hex2bn(&witness.dlog_witness.w, "65BB42E0");
     BN_hex2bn(&witness.dlog_witness.gamma, "65BB42E6");
@@ -66,28 +66,21 @@ void test_protocol()
     //BN_set_word(witness.r, 200);
 
 
-    string chl = "";
-    NIZK_Simulation_Encrypt_Signature_Prove_Compute_Chl(pp, instance, witness, chl, proof);
-    NIZK_Simulation_Encrypt_Signature_Simulate_Proof(pp, instance, witness, chl, proof);
+    BN_random(m);
+    string chl = BN_bn2string(m);
+    Simulation_Encrypt_Signature_Simulate_Proof(pp, instance, chl, proof);
 
-
-    string res = "";
-    NIZK_Simulation_Encrypt_Signature_Verify(pp, instance, witness, chl, proof, res);
-
-    if (res == chl){
-	cout << "Simulated proof accept." << endl;
-    	cout << "chl: " << chl << endl;
-    	cout << "res: " << res << endl;
-    }
+    //string res = "";
+    Simulation_Encrypt_Signature_Verify(pp, instance, chl, proof);
 
     Twisted_ElGamal_PP_free(enc_pp); 
     Twisted_ElGamal_KP_free(keypair); 
     Twisted_ElGamal_CT_free(CT); 
 
-    NIZK_Simulation_Encrypt_Signature_PP_free(pp);
-    NIZK_Simulation_Encrypt_Signature_Instance_free(instance);
-    NIZK_Simulation_Encrypt_Signature_Witness_free(witness);
-    NIZK_Simulation_Encrypt_Signature_Proof_free(proof);
+    Simulation_Encrypt_Signature_PP_free(pp);
+    Simulation_Encrypt_Signature_Instance_free(instance);
+    Simulation_Encrypt_Signature_Witness_free(witness);
+    Simulation_Encrypt_Signature_Proof_free(proof);
 
     BN_free(m);
 
