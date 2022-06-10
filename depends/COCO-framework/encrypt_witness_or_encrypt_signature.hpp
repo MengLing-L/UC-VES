@@ -132,20 +132,23 @@ void Encrypt_witNess_or_Encrypt_signature_Prove(Encrypt_witNess_or_Encrypt_signa
     
     BIGNUM* tmp_chl1 = BN_new();
     BIGNUM* tmp_chl0 = BN_new();
-    BIGNUM *e = BN_new();
-    Hash_String_to_BN(chl, e);
 
     BN_random(tmp_chl1);
 
     chl1 = BN_bn2string(tmp_chl1);
 
+    Simulation_Encrypt_Signature_Simulate_Proof(pp.sim_sig_pp, instance.sim_sig_instance, chl, chl1, proof.sim_sig_proof);
+
+    Witness_Encryption_AndR_Commit(pp.enc_witness_pp, instance.enc_witness_instance, witness.enc_witness_witness, chl, proof.enc_witness_proof);
+
+    BIGNUM *e = BN_new();
+    Hash_String_to_BN(chl, e);
+
     BN_sub (tmp_chl0, e, tmp_chl1);
 
     chl0 = BN_bn2string(tmp_chl0);
 
-    Simulation_Encrypt_Signature_Simulate_Proof(pp.sim_sig_pp, instance.sim_sig_instance, chl1, proof.sim_sig_proof);
-
-    Witness_Encryption_AndR_Prove(pp.enc_witness_pp, instance.enc_witness_instance, witness.enc_witness_witness, chl0, proof.enc_witness_proof);
+    Witness_Encryption_AndR_Res(pp.enc_witness_pp, instance.enc_witness_instance, witness.enc_witness_witness, chl0, proof.enc_witness_proof);
 
     BN_free(e);
     BN_free(tmp_chl1);
@@ -158,13 +161,15 @@ bool Encrypt_witNess_or_Encrypt_signature_Verify(Encrypt_witNess_or_Encrypt_sign
                             string &chl, 
                             string &chl1,
                             string &chl0,
-                            Encrypt_witNess_or_Encrypt_signature_Proof &proof){
+                            Encrypt_witNess_or_Encrypt_signature_Proof &proof,
+                            string &res){
 
-    Witness_Encryption_AndR_Verify(pp.enc_witness_pp, instance.enc_witness_instance, chl0, proof.enc_witness_proof);
+    Witness_Encryption_AndR_Verify(pp.enc_witness_pp, instance.enc_witness_instance, chl0, proof.enc_witness_proof, res);
     
-    Simulation_Encrypt_Signature_Verify(pp.sim_sig_pp, instance.sim_sig_instance, chl1, proof.sim_sig_proof);
+    Simulation_Encrypt_Signature_Verify(pp.sim_sig_pp, instance.sim_sig_instance, chl1, proof.sim_sig_proof, res);
 
-    BIGNUM *e = BN_new();
+
+    /*BIGNUM *e = BN_new();
     BIGNUM *tmp = BN_new();
     BIGNUM* tmp_chl1 = BN_new();
     BIGNUM* tmp_chl0 = BN_new();
@@ -182,7 +187,7 @@ bool Encrypt_witNess_or_Encrypt_signature_Verify(Encrypt_witNess_or_Encrypt_sign
     BN_free(e);
     BN_free(tmp_chl1);
     BN_free(tmp_chl0);
-    BN_free(tmp);
+    BN_free(tmp);*/
 }
 
 #endif

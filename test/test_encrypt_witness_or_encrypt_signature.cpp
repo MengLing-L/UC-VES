@@ -88,16 +88,20 @@ void test_protocol()
 
 
     BN_random(m);
-    string chl = BN_bn2string(m);
+    string chl = "";
 
     string chl1 = "";
     string chl0 = "";
 
     Encrypt_witNess_or_Encrypt_signature_Prove(pp, instance, witness, chl, chl1, chl0, proof);
 
-    Encrypt_witNess_or_Encrypt_signature_Verify(pp, instance, chl, chl1, chl0, proof);
+    string res = "";
+    Encrypt_witNess_or_Encrypt_signature_Verify(pp, instance, chl, chl1, chl0, proof, res);
 
 
+    cout << "chl: " << chl << endl;
+    cout << "res: " << res << endl;
+    
     Twisted_ElGamal_PP_free(enc_pp); 
     Twisted_ElGamal_KP_free(keypair); 
     Twisted_ElGamal_CT_free(CT); 

@@ -67,8 +67,9 @@ void test_protocol()
 
 
     BN_random(m);
-    string chl = BN_bn2string(m);
-    Simulation_Encrypt_Signature_Simulate_Proof(pp, instance, chl, proof);
+    string chl = "";
+    string chl1 = BN_bn2string(m);
+    Simulation_Encrypt_Signature_Simulate_Proof(pp, instance, chl, chl1, proof);
 
     //string res = "";
     Simulation_Encrypt_Signature_Verify(pp, instance, chl, proof);

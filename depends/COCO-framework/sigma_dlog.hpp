@@ -196,6 +196,69 @@ void SIGMA_DLOG_Setup(SIGMA_DLOG_PP &pp, EC_POINT* &h, EC_POINT* &EK, bool Sig_f
     #endif
 }
 
+void SIGMA_DLOG_Commit(SIGMA_DLOG_PP &pp, 
+                              SIGMA_DLOG_Instance &instance, 
+                              SIGMA_DLOG_Witness &witness,
+                              string &chl,
+                              SIGMA_DLOG_Proof &proof)
+{
+    
+    // begin to generate proof
+    //BIGNUM *phi_w = BN_new(); 
+    BN_random(proof.phi_w); 
+    //BIGNUM *phi_gamma = BN_new(); 
+    BN_random(proof.phi_gamma);
+
+    //EC_POINT_mul(group, Y1, phi_w, pp.h, phi_gamma, bn_ctx); 
+    const EC_POINT *vec_A[2]; 
+    const BIGNUM *vec_x[2];
+    vec_A[0] = pp.g; 
+    vec_A[1] = pp.h; 
+    vec_x[0] = proof.phi_w; 
+    vec_x[1] = proof.phi_gamma; 
+    EC_POINTs_mul(group, proof.Y1, NULL, 2, vec_A, vec_x, bn_ctx); // Y1 = g^p_s h^p_beta
+    
+    EC_POINT_mul(group, proof.Y2, NULL, pp.EK, proof.phi_gamma, bn_ctx);
+    
+    if(pp.Sig_flag){
+        EC_POINT_mul(group, proof.Y3, NULL, instance.B, proof.phi_w, bn_ctx);
+    } 
+
+    chl += ECP_ep2string(proof.Y1) + ECP_ep2string(proof.Y2); 
+
+    if(pp.Sig_flag){
+        chl += ECP_ep2string(proof.Y3);
+    }
+
+}
+
+void SIGMA_DLOG_Res(SIGMA_DLOG_PP &pp, 
+                              SIGMA_DLOG_Instance &instance, 
+                              SIGMA_DLOG_Witness &witness,
+                              string &chl,  
+                              SIGMA_DLOG_Proof &proof)
+{
+       
+    BIGNUM *e = BN_new(); 
+    Hash_String_to_BN(chl, e); // V's challenge in Zq; 
+
+    
+    BN_mul (proof.z1, e, witness.w, bn_ctx); 
+    BN_sub (proof.z1, proof.phi_w, proof.z1);
+
+    BN_mul (proof.z2, e, witness.gamma, bn_ctx); 
+    BN_sub (proof.z2, proof.phi_gamma, proof.z2);
+
+
+    #ifdef DEBUG
+    SIGMA_DLOG_Proof_print(proof); 
+    #endif
+
+    
+    BN_free(e);
+    
+}
+
 
 void SIGMA_DLOG_Prove(SIGMA_DLOG_PP &pp, 
                               SIGMA_DLOG_Instance &instance, 
@@ -251,11 +314,12 @@ void SIGMA_DLOG_Prove(SIGMA_DLOG_PP &pp,
 void SIGMA_DLOG_Simulate_Proof(SIGMA_DLOG_PP &pp, 
                               SIGMA_DLOG_Instance &instance,  
                               string &chl, 
+                              string &chl1,
                               SIGMA_DLOG_Proof &proof)
 {
 
     BIGNUM *e = BN_new(); 
-    Hash_String_to_BN(chl, e);
+    Hash_String_to_BN(chl1, e);
     
     BN_random (proof.z1);
     BN_random (proof.z2);
@@ -287,6 +351,11 @@ void SIGMA_DLOG_Simulate_Proof(SIGMA_DLOG_PP &pp,
         EC_POINTs_mul(group, proof.Y3, NULL, 2, vec_A, vec_x, bn_ctx); 
     }
 
+    chl += ECP_ep2string(proof.Y1) + ECP_ep2string(proof.Y2); 
+
+    if(pp.Sig_flag){
+        chl += ECP_ep2string(proof.Y3);
+    }
     #ifdef DEBUG
     SIGMA_DLOG_Proof_print(proof); 
     #endif
@@ -392,6 +461,66 @@ void SIGMA_DLOG_Verify(SIGMA_DLOG_PP &pp,
         cout<< "H(*): " << res << endl;
     }
     #endif*/
+
+    BN_free(e); 
+
+    EC_POINT_free(Y1);
+    EC_POINT_free(Y2);
+    EC_POINT_free(Y3);
+
+    //return Validity;
+}
+
+void SIGMA_DLOG_Verify(SIGMA_DLOG_PP &pp, 
+                               SIGMA_DLOG_Instance &instance,
+                               string &chl, 
+                               SIGMA_DLOG_Proof &proof,
+                               string &res)
+{
+    // initialize the transcript with instance 
+
+    EC_POINT *Y1 = EC_POINT_new(group);
+    EC_POINT *Y2 = EC_POINT_new(group);
+    EC_POINT *Y3 = EC_POINT_new(group);
+
+    
+    // compute the challenge
+    BIGNUM *e = BN_new(); 
+    Hash_String_to_BN(chl, e); // V's challenge in Zq; 
+
+     
+    const EC_POINT *vec_A[3]; 
+    const BIGNUM *vec_x[3]; 
+    
+    
+    vec_A[0] = instance.U; 
+    vec_A[1] = pp.g;
+    vec_A[2] = pp.h;
+    vec_x[0] = e; 
+    vec_x[1] = proof.z1;
+    vec_x[2] = proof.z2;
+    EC_POINTs_mul(group, Y1, NULL, 3, vec_A, vec_x, bn_ctx);  
+    
+
+    vec_A[0] = instance.V; 
+    vec_A[1] = pp.EK;
+    vec_x[0] = e; 
+    vec_x[1] = proof.z2;
+    EC_POINTs_mul(group, Y2, NULL, 2, vec_A, vec_x, bn_ctx);  
+
+    if(pp.Sig_flag){
+        vec_A[0] = instance.A; 
+        vec_A[1] = instance.B;
+        vec_x[0] = e; 
+        vec_x[1] = proof.z1;
+        EC_POINTs_mul(group, Y3, NULL, 2, vec_A, vec_x, bn_ctx); 
+    } 
+
+    res += ECP_ep2string(Y1) + ECP_ep2string(Y2);
+
+    if(pp.Sig_flag){
+        res += ECP_ep2string(Y3);
+    }
 
     BN_free(e); 
 

@@ -106,10 +106,11 @@ void Simulation_Encrypt_Signature_Setup(Simulation_Encrypt_Signature_PP &pp, EC_
 
 void Simulation_Encrypt_Signature_Simulate_Proof(Simulation_Encrypt_Signature_PP &pp, 
                             Simulation_Encrypt_Signature_Instance &instance,
-                            string &chl, 
+                            string &chl,
+                            string &chl1, 
                             Simulation_Encrypt_Signature_Proof &proof){
     
-    SIGMA_DLOG_Simulate_Proof(pp.dlog_pp, instance.dlog_instance, chl, proof.dlog_proof);
+    SIGMA_DLOG_Simulate_Proof(pp.dlog_pp, instance.dlog_instance, chl, chl1, proof.dlog_proof);
 
 }
 
@@ -121,6 +122,17 @@ bool Simulation_Encrypt_Signature_Verify(Simulation_Encrypt_Signature_PP &pp,
 
     
     SIGMA_DLOG_Verify(pp.dlog_pp, instance.dlog_instance, chl, proof.dlog_proof);
+
+}
+
+bool Simulation_Encrypt_Signature_Verify(Simulation_Encrypt_Signature_PP &pp, 
+                            Simulation_Encrypt_Signature_Instance &instance, 
+                            string &chl, 
+                            Simulation_Encrypt_Signature_Proof &proof,
+                            string &res){
+
+    
+    SIGMA_DLOG_Verify(pp.dlog_pp, instance.dlog_instance, chl, proof.dlog_proof, res);
 
 }
 
