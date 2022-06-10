@@ -15,7 +15,6 @@ this hpp implements NIZKPoK for discrete logarithm equality
 #include "../COCO-framework/sigma_dlog.hpp"
 #include "../twisted_elgamal/twisted_elgamal.hpp"
 
-const size_t SIGMA_DLOG_SIZE = 3;
 
 struct Simulation_Encrypt_Signature_PP
 {

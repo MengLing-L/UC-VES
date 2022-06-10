@@ -29,3 +29,7 @@ target_link_libraries(test_simulate_encrypt_signature ${OPENSSL_LIBRARIES})
 add_executable(test_sigma_dlog test/test_sigma_dlog.cpp)
 
 target_link_libraries(test_sigma_dlog ${OPENSSL_LIBRARIES})
+
+add_executable(test_encrypt_witness_or_encrypt_signature test/test_encrypt_witness_or_encrypt_signature.cpp)
+
+target_link_libraries(test_encrypt_witness_or_encrypt_signature ${OPENSSL_LIBRARIES})

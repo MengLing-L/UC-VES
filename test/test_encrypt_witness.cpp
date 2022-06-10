@@ -75,7 +75,7 @@ void test_protocol()
     string chl = BN_bn2string(m);
     Witness_Encryption_AndR_Prove(pp, instance, witness, chl, proof);
 
-    Witness_Encryption_AndR_Verify(pp, instance, witness, chl, proof);
+    Witness_Encryption_AndR_Verify(pp, instance, chl, proof);
 
 
     Twisted_ElGamal_PP_free(enc_pp); 

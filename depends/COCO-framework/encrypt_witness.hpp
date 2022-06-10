@@ -145,8 +145,7 @@ void Witness_Encryption_AndR_Prove(Witness_Encryption_AndR_PP &pp,
 
 
 bool Witness_Encryption_AndR_Verify(Witness_Encryption_AndR_PP &pp, 
-                            Witness_Encryption_AndR_Instance &instance, 
-                            Witness_Encryption_AndR_Witness &witness, 
+                            Witness_Encryption_AndR_Instance &instance,  
                             string &chl, 
                             Witness_Encryption_AndR_Proof &proof){
 
