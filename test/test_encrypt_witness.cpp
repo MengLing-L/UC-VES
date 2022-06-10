@@ -31,16 +31,16 @@ void test_protocol()
     Twisted_ElGamal_CT_new(CT); 
 
     Witness_Encryption_AndR_PP pp;
-    NIZK_Witness_Encryption_AndR_PP_new(pp);
-    NIZK_Witness_Encryption_AndR_Setup(pp, enc_pp.h, keypair.pk);
+    Witness_Encryption_AndR_PP_new(pp);
+    Witness_Encryption_AndR_Setup(pp, enc_pp.h, keypair.pk);
     Witness_Encryption_AndR_Instance instance;
-    NIZK_Witness_Encryption_AndR_Instance_new(instance);
+    Witness_Encryption_AndR_Instance_new(instance);
     Witness_Encryption_AndR_Witness witness;
-    NIZK_Witness_Encryption_AndR_Witness_new(witness);
+    Witness_Encryption_AndR_Witness_new(witness);
     
     
     Witness_Encryption_AndR_Proof proof;
-    NIZK_Witness_Encryption_AndR_Proof_new(proof);
+    Witness_Encryption_AndR_Proof_new(proof);
 
     BN_hex2bn(&witness.dlog_witness[0].w, "65BB42E0");
     BN_hex2bn(&witness.dlog_witness[0].gamma, "65BB42E6");
@@ -71,29 +71,21 @@ void test_protocol()
     //BN_set_word(witness.r, 200);
 
 
-    string chl = "";
-    NIZK_Witness_Encryption_AndR_Prove_Compute_Chl(pp, instance, witness, chl, proof);
+    BN_random(m);
+    string chl = BN_bn2string(m);
+    Witness_Encryption_AndR_Prove(pp, instance, witness, chl, proof);
 
-    NIZK_Witness_Encryption_AndR_Prove_Compute_Proof(pp, instance, witness, chl, proof);
+    Witness_Encryption_AndR_Verify(pp, instance, witness, chl, proof);
 
-
-    string res = "";
-    NIZK_Witness_Encryption_AndR_Verify(pp, instance, witness, chl, proof, res);
-
-    if (res == chl){
-	cout << "Range proof accept." << endl;
-    	cout << "chl: " << chl << endl;
-    	cout << "res: " << res << endl;
-    }
 
     Twisted_ElGamal_PP_free(enc_pp); 
     Twisted_ElGamal_KP_free(keypair); 
     Twisted_ElGamal_CT_free(CT); 
 
-    NIZK_Witness_Encryption_AndR_PP_free(pp);
-    NIZK_Witness_Encryption_AndR_Instance_free(instance);
-    NIZK_Witness_Encryption_AndR_Witness_free(witness);
-    NIZK_Witness_Encryption_AndR_Proof_free(proof);
+    Witness_Encryption_AndR_PP_free(pp);
+    Witness_Encryption_AndR_Instance_free(instance);
+    Witness_Encryption_AndR_Witness_free(witness);
+    Witness_Encryption_AndR_Proof_free(proof);
 
     BN_free(m);
 
