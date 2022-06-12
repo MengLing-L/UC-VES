@@ -162,27 +162,36 @@ void COCO_Framework_Prove(COCO_Framework_PP &pp,
     getV(instance.instance.enc_witness_instance.dlog_instance[0].V, each_4bytes_m_res_U_V, pp_tt); 
 
     //encrypt the second witness
+    vector<BIGNUM *> split_each_4bytes_m1(BN_LEN/4);
+    BN_vec_new(split_each_4bytes_m1);
+    get_32bit_4bytes_BigNumVec(split_each_4bytes_m1, witness.witness.enc_witness_witness.dlog_witness[2].gamma, pp_tt);
 
-    get_32bit_4bytes_BigNumVec(split_each_4bytes_m, witness.witness.enc_witness_witness.dlog_witness[2].gamma, pp_tt);
-
-    for(int i=0; i<split_each_4bytes_m.size(); i++){
-        BN_random(each_4bytes_m_beta[i]);
-        BN_mod(split_each_4bytes_m[i], split_each_4bytes_m[i], pp_tt.BN_MSG_SIZE, bn_ctx);
-        Twisted_ElGamal_Enc(pp_tt, keypair.pk, split_each_4bytes_m[i], each_4bytes_m_beta[i], each_4bytes_m_res_U_V[i]);     
+    vector<BIGNUM *> each_4bytes_m_beta1(BN_LEN/4);
+    BN_vec_new(each_4bytes_m_beta1);
+    
+    vector<Twisted_ElGamal_CT> each_4bytes_m_res_U_V1(BN_LEN/4);
+    for(auto i = 0; i < each_4bytes_m_res_U_V1.size(); i++){
+        Twisted_ElGamal_CT_new(each_4bytes_m_res_U_V1[i]); 
     }
 
-    for(int j=0; j<each_4bytes_m_beta.size(); j++){
-        BN_set_word(tmp, pp_tt.MSG_LEN*(each_4bytes_m_beta.size()-j-1));
+    for(int i=0; i<split_each_4bytes_m1.size(); i++){
+        BN_random(each_4bytes_m_beta1[i]);
+        BN_mod(split_each_4bytes_m1[i], split_each_4bytes_m1[i], pp_tt.BN_MSG_SIZE, bn_ctx);
+        Twisted_ElGamal_Enc(pp_tt, keypair.pk, split_each_4bytes_m1[i], each_4bytes_m_beta1[i], each_4bytes_m_res_U_V1[i]);     
+    }
+
+    for(int j=0; j < each_4bytes_m_beta1.size(); j++){
+        BN_set_word(tmp, pp_tt.MSG_LEN*(each_4bytes_m_beta1.size()-j-1));
         BN_mod_exp(tmp, BN_2, tmp, order, bn_ctx);
-        BN_mod_mul(tmp, each_4bytes_m_beta[j], tmp, order, bn_ctx);
+        BN_mod_mul(tmp, each_4bytes_m_beta1[j], tmp, order, bn_ctx);
         BN_mod_add(witness.witness.enc_witness_witness.dlog_witness[1].gamma, witness.witness.enc_witness_witness.dlog_witness[1].gamma, tmp, order, bn_ctx);
     }
 
     BN_copy(witness.witness.enc_witness_witness.dlog_witness[1].w, witness.witness.enc_witness_witness.dlog_witness[2].gamma);
 
-    getU(instance.instance.enc_witness_instance.dlog_instance[1].U, each_4bytes_m_res_U_V, pp_tt); 
+    getU(instance.instance.enc_witness_instance.dlog_instance[1].U, each_4bytes_m_res_U_V1, pp_tt); 
 
-    getV(instance.instance.enc_witness_instance.dlog_instance[1].V, each_4bytes_m_res_U_V, pp_tt); 
+    getV(instance.instance.enc_witness_instance.dlog_instance[1].V, each_4bytes_m_res_U_V1, pp_tt); 
 
     //simulation of the proof for the invalid signature.
     BIGNUM *m = BN_new();
