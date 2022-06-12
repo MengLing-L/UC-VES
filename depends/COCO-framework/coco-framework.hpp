@@ -100,8 +100,8 @@ void COCO_Framework_Proof_print(COCO_Framework_Proof &proof)
 }
 
 
-void COCO_Framework_Setup(COCO_Framework_PP &pp, EC_POINT* &h, EC_POINT* &EK){
-    Encrypt_witNess_or_Encrypt_signature_Setup(pp.pp, h, EK);
+void COCO_Framework_Setup(COCO_Framework_PP &pp, EC_POINT* &h){
+    Encrypt_witNess_or_Encrypt_signature_Setup(pp.pp, h);
 }
 
 
@@ -109,23 +109,12 @@ void COCO_Framework_Prove(COCO_Framework_PP &pp,
                             COCO_Framework_Instance &instance, 
                             COCO_Framework_Witness &witness,
                             string &chl,
-                            COCO_Framework_Proof &proof){
+                            COCO_Framework_Proof &proof,
+                            EC_POINT* &EK,
+                            EC_POINT* &EK1,
+                            Twisted_ElGamal_PP &pp_tt){
     //hard code C
-    Twisted_ElGamal_PP pp_tt; 
-    Twisted_ElGamal_PP_new(pp_tt);
-    size_t MSG_LEN = 32; 
-    size_t TUNNING = 7; 
-    size_t DEC_THREAD_NUM = 4;
-    size_t IO_THREAD_NUM = 4;      
-    Twisted_ElGamal_Setup(pp_tt, MSG_LEN, TUNNING, DEC_THREAD_NUM, IO_THREAD_NUM);
-    Twisted_ElGamal_Initialize(pp_tt); 
-
-    Twisted_ElGamal_KP keypair;
-    Twisted_ElGamal_KP_new(keypair); 
-    Twisted_ElGamal_KeyGen(pp_tt, keypair); 
-
-    Twisted_ElGamal_CT CT; 
-    Twisted_ElGamal_CT_new(CT); 
+    
 
     vector<BIGNUM *> split_each_4bytes_m(BN_LEN/4);
     BN_vec_new(split_each_4bytes_m);
@@ -145,7 +134,7 @@ void COCO_Framework_Prove(COCO_Framework_PP &pp,
         BN_random(each_4bytes_m_beta[i]);
         BN_mod(split_each_4bytes_m[i], split_each_4bytes_m[i], pp_tt.BN_MSG_SIZE, bn_ctx);
         //BN_print(split_each_4bytes_m[i], "split_each_4bytes_m");
-        Twisted_ElGamal_Enc(pp_tt, keypair.pk, split_each_4bytes_m[i], each_4bytes_m_beta[i], each_4bytes_m_res_U_V[i]);     
+        Twisted_ElGamal_Enc(pp_tt, EK, split_each_4bytes_m[i], each_4bytes_m_beta[i], each_4bytes_m_res_U_V[i]);     
     }
 
     for(int j=0; j<each_4bytes_m_beta.size(); j++){
@@ -177,7 +166,7 @@ void COCO_Framework_Prove(COCO_Framework_PP &pp,
     for(int i=0; i<split_each_4bytes_m1.size(); i++){
         BN_random(each_4bytes_m_beta1[i]);
         BN_mod(split_each_4bytes_m1[i], split_each_4bytes_m1[i], pp_tt.BN_MSG_SIZE, bn_ctx);
-        Twisted_ElGamal_Enc(pp_tt, keypair.pk, split_each_4bytes_m1[i], each_4bytes_m_beta1[i], each_4bytes_m_res_U_V1[i]);     
+        Twisted_ElGamal_Enc(pp_tt, EK, split_each_4bytes_m1[i], each_4bytes_m_beta1[i], each_4bytes_m_res_U_V1[i]);     
     }
 
     for(int j=0; j < each_4bytes_m_beta1.size(); j++){
@@ -205,20 +194,20 @@ void COCO_Framework_Prove(COCO_Framework_PP &pp,
     EC_POINT_mul(group, instance.instance.sim_sig_instance.dlog_instance.B, NULL, pp_tt.g, m, bn_ctx);
     EC_POINT_mul(group, instance.instance.sim_sig_instance.dlog_instance.A, NULL, instance.instance.sim_sig_instance.dlog_instance.B, witness.witness.sim_sig_witness.dlog_witness.w, bn_ctx);
 
-    Encrypt_witNess_or_Encrypt_signature_Prove(pp.pp, instance.instance, witness.witness, chl, proof.chl1, proof.chl0, proof.proof);
+    Encrypt_witNess_or_Encrypt_signature_Prove(pp.pp, instance.instance, witness.witness, chl, proof.chl1, proof.chl0, proof.proof, EK, EK1);
 
-    Twisted_ElGamal_PP_free(pp_tt); 
-    Twisted_ElGamal_KP_free(keypair); 
-    Twisted_ElGamal_CT_free(CT); 
+ 
 }
 
 void COCO_Framework_Verify(COCO_Framework_PP &pp, 
                             COCO_Framework_Instance &instance, 
                             string &chl,  
                             COCO_Framework_Proof &proof,
-                            string &res){
+                            string &res,
+                            EC_POINT* &EK,
+                            EC_POINT* &EK1){
 
-    Encrypt_witNess_or_Encrypt_signature_Verify(pp.pp, instance.instance, chl, proof.chl1, proof.chl0, proof.proof, res);
+    Encrypt_witNess_or_Encrypt_signature_Verify(pp.pp, instance.instance, chl, proof.chl1, proof.chl0, proof.proof, res, EK, EK1);
 }
 
 #endif

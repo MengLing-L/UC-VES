@@ -31,7 +31,7 @@ void test_protocol()
 
     SIGMA_DLOG_PP dlog_pp;
     SIGMA_DLOG_PP_new(dlog_pp);
-    SIGMA_DLOG_Setup(dlog_pp, pp.h, keypair.pk, false);
+    SIGMA_DLOG_Setup(dlog_pp, pp.h, false);
     SIGMA_DLOG_Instance dlog_instance;
     SIGMA_DLOG_Instance_new(dlog_instance);
     SIGMA_DLOG_Witness dlog_witness;
@@ -62,10 +62,10 @@ void test_protocol()
 
     BN_random(m);
     string chl = BN_bn2string(m);
-    SIGMA_DLOG_Prove(dlog_pp, dlog_instance, dlog_witness, chl, dlog_proof);
+    SIGMA_DLOG_Prove(dlog_pp, dlog_instance, dlog_witness, chl, dlog_proof, keypair.pk);
 
     //string res = "";
-    SIGMA_DLOG_Verify(dlog_pp, dlog_instance, chl, dlog_proof);
+    SIGMA_DLOG_Verify(dlog_pp, dlog_instance, chl, dlog_proof, keypair.pk);
 
     
  
@@ -105,7 +105,7 @@ void test_protocol2()
 
     SIGMA_DLOG_PP dlog_pp;
     SIGMA_DLOG_PP_new(dlog_pp);
-    SIGMA_DLOG_Setup(dlog_pp, pp.h, keypair.pk, true);
+    SIGMA_DLOG_Setup(dlog_pp, pp.h, true);
     SIGMA_DLOG_Instance dlog_instance;
     SIGMA_DLOG_Instance_new(dlog_instance);
     SIGMA_DLOG_Witness dlog_witness;
@@ -141,10 +141,10 @@ void test_protocol2()
 
     BN_random(m);
     string chl = BN_bn2string(m);
-    SIGMA_DLOG_Prove(dlog_pp, dlog_instance, dlog_witness, chl, dlog_proof);
+    SIGMA_DLOG_Prove(dlog_pp, dlog_instance, dlog_witness, chl, dlog_proof, keypair.pk);
 
     //string res = "";
-    SIGMA_DLOG_Verify(dlog_pp, dlog_instance, chl, dlog_proof);
+    SIGMA_DLOG_Verify(dlog_pp, dlog_instance, chl, dlog_proof, keypair.pk);
     
 	
  

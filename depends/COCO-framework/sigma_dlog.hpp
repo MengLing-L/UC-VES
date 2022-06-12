@@ -17,7 +17,7 @@ this hpp implements NIZKPoK for discrete logarithm equality
 struct SIGMA_DLOG_PP
 {
     EC_POINT *g, *h;         
-    EC_POINT *EK;
+    //EC_POINT *EK;
     bool Sig_flag;
 };
 
@@ -49,7 +49,7 @@ struct SIGMA_DLOG_Proof
 void SIGMA_DLOG_PP_new(SIGMA_DLOG_PP &pp){
     pp.g = EC_POINT_new(group);
     pp.h = EC_POINT_new(group);
-    pp.EK = EC_POINT_new(group);
+    //pp.EK = EC_POINT_new(group);
 }
 
 
@@ -57,7 +57,7 @@ void SIGMA_DLOG_PP_free(SIGMA_DLOG_PP &pp)
 { 
     EC_POINT_free(pp.g); 
     EC_POINT_free(pp.h); 
-    EC_POINT_free(pp.EK);
+    //EC_POINT_free(pp.EK);
 }
 
 void SIGMA_DLOG_Instance_new(SIGMA_DLOG_Instance &instance)
@@ -120,7 +120,7 @@ void SIGMA_DLOG_PP_print(SIGMA_DLOG_PP &pp)
     cout << "DLOG Proofs Public parameters >>> " << endl;
     ECP_print(pp.g, "pp.g"); 
     ECP_print(pp.h, "pp.h"); 
-    ECP_print(pp.EK, "pp.EK");
+    //ECP_print(pp.EK, "pp.EK");
 }
 
 void SIGMA_DLOG_Instance_print(SIGMA_DLOG_Instance &instance)
@@ -183,12 +183,12 @@ void SIGMA_DLOG_Proof_deserialize(SIGMA_DLOG_Proof &proof, ifstream &fin)
 
 
 /* Setup algorithm: do nothing */ 
-void SIGMA_DLOG_Setup(SIGMA_DLOG_PP &pp, EC_POINT* &h, EC_POINT* &EK, bool Sig_flag)
+void SIGMA_DLOG_Setup(SIGMA_DLOG_PP &pp, EC_POINT* &h, bool Sig_flag)
 { 
     EC_POINT_copy(pp.g, h); 
     EC_POINT_copy(pp.h, generator);
     //Hash_ECP_to_ECP(pp.g, pp.h);
-    EC_POINT_copy(pp.EK, EK);
+    //EC_POINT_copy(pp.EK, EK);
     pp.Sig_flag = Sig_flag;
 
     #ifdef DEBUG
@@ -200,7 +200,8 @@ void SIGMA_DLOG_Commit(SIGMA_DLOG_PP &pp,
                               SIGMA_DLOG_Instance &instance, 
                               SIGMA_DLOG_Witness &witness,
                               string &chl,
-                              SIGMA_DLOG_Proof &proof)
+                              SIGMA_DLOG_Proof &proof,
+                              EC_POINT* &EK)
 {
     
     // begin to generate proof
@@ -218,7 +219,7 @@ void SIGMA_DLOG_Commit(SIGMA_DLOG_PP &pp,
     vec_x[1] = proof.phi_gamma; 
     EC_POINTs_mul(group, proof.Y1, NULL, 2, vec_A, vec_x, bn_ctx); // Y1 = g^p_s h^p_beta
     
-    EC_POINT_mul(group, proof.Y2, NULL, pp.EK, proof.phi_gamma, bn_ctx);
+    EC_POINT_mul(group, proof.Y2, NULL, EK, proof.phi_gamma, bn_ctx);
     
     if(pp.Sig_flag){
         EC_POINT_mul(group, proof.Y3, NULL, instance.B, proof.phi_w, bn_ctx);
@@ -264,7 +265,8 @@ void SIGMA_DLOG_Prove(SIGMA_DLOG_PP &pp,
                               SIGMA_DLOG_Instance &instance, 
                               SIGMA_DLOG_Witness &witness,
                               string &chl,  
-                              SIGMA_DLOG_Proof &proof)
+                              SIGMA_DLOG_Proof &proof,
+                              EC_POINT* &EK)
 {
     
     // begin to generate proof
@@ -282,7 +284,7 @@ void SIGMA_DLOG_Prove(SIGMA_DLOG_PP &pp,
     vec_x[1] = proof.phi_gamma; 
     EC_POINTs_mul(group, proof.Y1, NULL, 2, vec_A, vec_x, bn_ctx); // Y1 = g^p_s h^p_beta
     
-    EC_POINT_mul(group, proof.Y2, NULL, pp.EK, proof.phi_gamma, bn_ctx);
+    EC_POINT_mul(group, proof.Y2, NULL, EK, proof.phi_gamma, bn_ctx);
     
     if(pp.Sig_flag){
         EC_POINT_mul(group, proof.Y3, NULL, instance.B, proof.phi_w, bn_ctx);
@@ -315,7 +317,8 @@ void SIGMA_DLOG_Simulate_Proof(SIGMA_DLOG_PP &pp,
                               SIGMA_DLOG_Instance &instance,  
                               string &chl, 
                               string &chl1,
-                              SIGMA_DLOG_Proof &proof)
+                              SIGMA_DLOG_Proof &proof,
+                              EC_POINT* &EK)
 {
 
     BIGNUM *e = BN_new(); 
@@ -338,7 +341,7 @@ void SIGMA_DLOG_Simulate_Proof(SIGMA_DLOG_PP &pp,
     
 
     vec_A[0] = instance.V; 
-    vec_A[1] = pp.EK;
+    vec_A[1] = EK;
     vec_x[0] = e; 
     vec_x[1] = proof.z2;
     EC_POINTs_mul(group, proof.Y2, NULL, 2, vec_A, vec_x, bn_ctx);  
@@ -369,7 +372,8 @@ void SIGMA_DLOG_Simulate_Proof(SIGMA_DLOG_PP &pp,
 void SIGMA_DLOG_Verify(SIGMA_DLOG_PP &pp, 
                                SIGMA_DLOG_Instance &instance,
                                string &chl, 
-                               SIGMA_DLOG_Proof &proof)
+                               SIGMA_DLOG_Proof &proof,
+                               EC_POINT* &EK)
 {
     // initialize the transcript with instance 
 
@@ -397,7 +401,7 @@ void SIGMA_DLOG_Verify(SIGMA_DLOG_PP &pp,
     
 
     vec_A[0] = instance.V; 
-    vec_A[1] = pp.EK;
+    vec_A[1] = EK;
     vec_x[0] = e; 
     vec_x[1] = proof.z2;
     EC_POINTs_mul(group, Y2, NULL, 2, vec_A, vec_x, bn_ctx);  
@@ -475,7 +479,8 @@ void SIGMA_DLOG_Verify(SIGMA_DLOG_PP &pp,
                                SIGMA_DLOG_Instance &instance,
                                string &chl, 
                                SIGMA_DLOG_Proof &proof,
-                               string &res)
+                               string &res,
+                               EC_POINT* &EK)
 {
     // initialize the transcript with instance 
 
@@ -503,7 +508,7 @@ void SIGMA_DLOG_Verify(SIGMA_DLOG_PP &pp,
     
 
     vec_A[0] = instance.V; 
-    vec_A[1] = pp.EK;
+    vec_A[1] = EK;
     vec_x[0] = e; 
     vec_x[1] = proof.z2;
     EC_POINTs_mul(group, Y2, NULL, 2, vec_A, vec_x, bn_ctx);  

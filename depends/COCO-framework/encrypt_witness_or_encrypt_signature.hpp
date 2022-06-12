@@ -115,9 +115,9 @@ void Encrypt_witNess_or_Encrypt_signature_Proof_print(Encrypt_witNess_or_Encrypt
 
 
 
-void Encrypt_witNess_or_Encrypt_signature_Setup(Encrypt_witNess_or_Encrypt_signature_PP &pp, EC_POINT* &h, EC_POINT* &EK){
-    Witness_Encryption_AndR_Setup(pp.enc_witness_pp, h, EK);
-    Simulation_Encrypt_Signature_Setup(pp.sim_sig_pp, h, EK);
+void Encrypt_witNess_or_Encrypt_signature_Setup(Encrypt_witNess_or_Encrypt_signature_PP &pp, EC_POINT* &h){
+    Witness_Encryption_AndR_Setup(pp.enc_witness_pp, h);
+    Simulation_Encrypt_Signature_Setup(pp.sim_sig_pp, h);
 }
 
 
@@ -127,7 +127,9 @@ void Encrypt_witNess_or_Encrypt_signature_Prove(Encrypt_witNess_or_Encrypt_signa
                             string &chl,
                             string &chl1,
                             string &chl0, 
-                            Encrypt_witNess_or_Encrypt_signature_Proof &proof){
+                            Encrypt_witNess_or_Encrypt_signature_Proof &proof,
+                            EC_POINT* &EK,
+                            EC_POINT* &EK1){
     
     
     BIGNUM* tmp_chl1 = BN_new();
@@ -137,9 +139,9 @@ void Encrypt_witNess_or_Encrypt_signature_Prove(Encrypt_witNess_or_Encrypt_signa
 
     chl1 = BN_bn2string(tmp_chl1);
 
-    Simulation_Encrypt_Signature_Simulate_Proof(pp.sim_sig_pp, instance.sim_sig_instance, chl, chl1, proof.sim_sig_proof);
+    Simulation_Encrypt_Signature_Simulate_Proof(pp.sim_sig_pp, instance.sim_sig_instance, chl, chl1, proof.sim_sig_proof, EK);
 
-    Witness_Encryption_AndR_Commit(pp.enc_witness_pp, instance.enc_witness_instance, witness.enc_witness_witness, chl, proof.enc_witness_proof);
+    Witness_Encryption_AndR_Commit(pp.enc_witness_pp, instance.enc_witness_instance, witness.enc_witness_witness, chl, proof.enc_witness_proof, EK, EK1);
 
     BIGNUM *e = BN_new();
     Hash_String_to_BN(chl, e);
@@ -162,10 +164,12 @@ bool Encrypt_witNess_or_Encrypt_signature_Verify(Encrypt_witNess_or_Encrypt_sign
                             string &chl1,
                             string &chl0,
                             Encrypt_witNess_or_Encrypt_signature_Proof &proof,
-                            string &res){
-    Simulation_Encrypt_Signature_Verify(pp.sim_sig_pp, instance.sim_sig_instance, chl1, proof.sim_sig_proof, res);
+                            string &res,
+                            EC_POINT* &EK,
+                            EC_POINT* &EK1){
+    Simulation_Encrypt_Signature_Verify(pp.sim_sig_pp, instance.sim_sig_instance, chl1, proof.sim_sig_proof, res, EK);
 
-    Witness_Encryption_AndR_Verify(pp.enc_witness_pp, instance.enc_witness_instance, chl0, proof.enc_witness_proof, res);
+    Witness_Encryption_AndR_Verify(pp.enc_witness_pp, instance.enc_witness_instance, chl0, proof.enc_witness_proof, res, EK, EK1);
     
 
 

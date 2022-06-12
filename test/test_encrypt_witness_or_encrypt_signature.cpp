@@ -32,7 +32,7 @@ void test_protocol()
 
     Encrypt_witNess_or_Encrypt_signature_PP pp;
     Encrypt_witNess_or_Encrypt_signature_PP_new(pp);
-    Encrypt_witNess_or_Encrypt_signature_Setup(pp, enc_pp.h, keypair.pk);
+    Encrypt_witNess_or_Encrypt_signature_Setup(pp, enc_pp.h);
     Encrypt_witNess_or_Encrypt_signature_Instance instance;
     Encrypt_witNess_or_Encrypt_signature_Instance_new(instance);
     Encrypt_witNess_or_Encrypt_signature_Witness witness;
@@ -93,10 +93,10 @@ void test_protocol()
     string chl1 = "";
     string chl0 = "";
 
-    Encrypt_witNess_or_Encrypt_signature_Prove(pp, instance, witness, chl, chl1, chl0, proof);
+    Encrypt_witNess_or_Encrypt_signature_Prove(pp, instance, witness, chl, chl1, chl0, proof, keypair.pk, keypair.pk);
 
     string res = "";
-    Encrypt_witNess_or_Encrypt_signature_Verify(pp, instance, chl, chl1, chl0, proof, res);
+    Encrypt_witNess_or_Encrypt_signature_Verify(pp, instance, chl, chl1, chl0, proof, res, keypair.pk, keypair.pk);
 
     bool Validity = (res == chl); 
 

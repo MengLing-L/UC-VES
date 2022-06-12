@@ -32,7 +32,7 @@ void test_protocol()
 
     Simulation_Encrypt_Signature_PP pp;
     Simulation_Encrypt_Signature_PP_new(pp);
-    Simulation_Encrypt_Signature_Setup(pp, enc_pp.h, keypair.pk);
+    Simulation_Encrypt_Signature_Setup(pp, enc_pp.h);
     Simulation_Encrypt_Signature_Instance instance;
     Simulation_Encrypt_Signature_Instance_new(instance);
     Simulation_Encrypt_Signature_Witness witness;
@@ -69,10 +69,10 @@ void test_protocol()
     BN_random(m);
     string chl = "";
     string chl1 = BN_bn2string(m);
-    Simulation_Encrypt_Signature_Simulate_Proof(pp, instance, chl, chl1, proof);
+    Simulation_Encrypt_Signature_Simulate_Proof(pp, instance, chl, chl1, proof, keypair.pk);
 
     //string res = "";
-    Simulation_Encrypt_Signature_Verify(pp, instance, chl, proof);
+    Simulation_Encrypt_Signature_Verify(pp, instance, chl, proof, keypair.pk);
 
     Twisted_ElGamal_PP_free(enc_pp); 
     Twisted_ElGamal_KP_free(keypair); 

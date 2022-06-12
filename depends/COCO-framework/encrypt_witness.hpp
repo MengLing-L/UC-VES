@@ -126,20 +126,22 @@ void Witness_Encryption_AndR_Proof_print(Witness_Encryption_AndR_Proof &proof)
 
 
 
-void Witness_Encryption_AndR_Setup(Witness_Encryption_AndR_PP &pp, EC_POINT* &h, EC_POINT* &EK){
-    SIGMA_DLOG_Setup(pp.dlog_pp_sig, h, EK, true);
-    SIGMA_DLOG_Setup(pp.dlog_pp_unsig, h, EK, false);
+void Witness_Encryption_AndR_Setup(Witness_Encryption_AndR_PP &pp, EC_POINT* &h){
+    SIGMA_DLOG_Setup(pp.dlog_pp_sig, h, true);
+    SIGMA_DLOG_Setup(pp.dlog_pp_unsig, h, false);
 }
 
 void Witness_Encryption_AndR_Commit(Witness_Encryption_AndR_PP &pp, 
                             Witness_Encryption_AndR_Instance &instance, 
                             Witness_Encryption_AndR_Witness &witness,
                             string &chl,
-                            Witness_Encryption_AndR_Proof &proof){
+                            Witness_Encryption_AndR_Proof &proof,
+                            EC_POINT* &EK,
+                            EC_POINT* &EK1){
     
-    SIGMA_DLOG_Commit(pp.dlog_pp_unsig, instance.dlog_instance[0], witness.dlog_witness[0], chl, proof.dlog_proof[0]);
-    SIGMA_DLOG_Commit(pp.dlog_pp_unsig, instance.dlog_instance[1], witness.dlog_witness[1], chl, proof.dlog_proof[1]);
-    SIGMA_DLOG_Commit(pp.dlog_pp_sig, instance.dlog_instance[2], witness.dlog_witness[2], chl, proof.dlog_proof[2]);
+    SIGMA_DLOG_Commit(pp.dlog_pp_unsig, instance.dlog_instance[0], witness.dlog_witness[0], chl, proof.dlog_proof[0], EK);
+    SIGMA_DLOG_Commit(pp.dlog_pp_unsig, instance.dlog_instance[1], witness.dlog_witness[1], chl, proof.dlog_proof[1], EK);
+    SIGMA_DLOG_Commit(pp.dlog_pp_sig, instance.dlog_instance[2], witness.dlog_witness[2], chl, proof.dlog_proof[2], EK1);
 
 }
 
@@ -159,11 +161,13 @@ void Witness_Encryption_AndR_Prove(Witness_Encryption_AndR_PP &pp,
                             Witness_Encryption_AndR_Instance &instance, 
                             Witness_Encryption_AndR_Witness &witness,
                             string &chl, 
-                            Witness_Encryption_AndR_Proof &proof){
+                            Witness_Encryption_AndR_Proof &proof,
+                            EC_POINT* &EK,
+                            EC_POINT* &EK1){
     
-    SIGMA_DLOG_Prove(pp.dlog_pp_unsig, instance.dlog_instance[0], witness.dlog_witness[0], chl, proof.dlog_proof[0]);
-    SIGMA_DLOG_Prove(pp.dlog_pp_unsig, instance.dlog_instance[1], witness.dlog_witness[1], chl, proof.dlog_proof[1]);
-    SIGMA_DLOG_Prove(pp.dlog_pp_sig, instance.dlog_instance[2], witness.dlog_witness[2], chl, proof.dlog_proof[2]);
+    SIGMA_DLOG_Prove(pp.dlog_pp_unsig, instance.dlog_instance[0], witness.dlog_witness[0], chl, proof.dlog_proof[0], EK);
+    SIGMA_DLOG_Prove(pp.dlog_pp_unsig, instance.dlog_instance[1], witness.dlog_witness[1], chl, proof.dlog_proof[1], EK);
+    SIGMA_DLOG_Prove(pp.dlog_pp_sig, instance.dlog_instance[2], witness.dlog_witness[2], chl, proof.dlog_proof[2], EK1);
 
 }
 
@@ -171,12 +175,14 @@ void Witness_Encryption_AndR_Prove(Witness_Encryption_AndR_PP &pp,
 bool Witness_Encryption_AndR_Verify(Witness_Encryption_AndR_PP &pp, 
                             Witness_Encryption_AndR_Instance &instance,  
                             string &chl, 
-                            Witness_Encryption_AndR_Proof &proof){
+                            Witness_Encryption_AndR_Proof &proof,
+                            EC_POINT* &EK,
+                            EC_POINT* &EK1){
 
     
-    SIGMA_DLOG_Verify(pp.dlog_pp_unsig, instance.dlog_instance[0], chl, proof.dlog_proof[0]);
-    SIGMA_DLOG_Verify(pp.dlog_pp_unsig, instance.dlog_instance[1], chl, proof.dlog_proof[1]);
-    SIGMA_DLOG_Verify(pp.dlog_pp_sig, instance.dlog_instance[2], chl, proof.dlog_proof[2]);
+    SIGMA_DLOG_Verify(pp.dlog_pp_unsig, instance.dlog_instance[0], chl, proof.dlog_proof[0], EK);
+    SIGMA_DLOG_Verify(pp.dlog_pp_unsig, instance.dlog_instance[1], chl, proof.dlog_proof[1], EK);
+    SIGMA_DLOG_Verify(pp.dlog_pp_sig, instance.dlog_instance[2], chl, proof.dlog_proof[2], EK1);
 
 }
 
@@ -184,11 +190,13 @@ bool Witness_Encryption_AndR_Verify(Witness_Encryption_AndR_PP &pp,
                             Witness_Encryption_AndR_Instance &instance,  
                             string &chl, 
                             Witness_Encryption_AndR_Proof &proof,
-                            string &res){
+                            string &res,
+                            EC_POINT* &EK,
+                            EC_POINT* &EK1){
     
-    SIGMA_DLOG_Verify(pp.dlog_pp_unsig, instance.dlog_instance[0], chl, proof.dlog_proof[0], res);
-    SIGMA_DLOG_Verify(pp.dlog_pp_unsig, instance.dlog_instance[1], chl, proof.dlog_proof[1], res);
-    SIGMA_DLOG_Verify(pp.dlog_pp_sig, instance.dlog_instance[2], chl, proof.dlog_proof[2], res);
+    SIGMA_DLOG_Verify(pp.dlog_pp_unsig, instance.dlog_instance[0], chl, proof.dlog_proof[0], res, EK);
+    SIGMA_DLOG_Verify(pp.dlog_pp_unsig, instance.dlog_instance[1], chl, proof.dlog_proof[1], res, EK);
+    SIGMA_DLOG_Verify(pp.dlog_pp_sig, instance.dlog_instance[2], chl, proof.dlog_proof[2], res, EK1);
 
 }
 

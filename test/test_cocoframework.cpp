@@ -22,12 +22,21 @@ void test_protocol()
     Signature_Result signature_result;
     Signature_Result_new(signature_result);
 
-    Twisted_ElGamal_PP enc_pp; 
-    Twisted_ElGamal_PP_new(enc_pp);
+    Twisted_ElGamal_PP pp_tt; 
+    Twisted_ElGamal_PP_new(pp_tt);
     size_t MSG_LEN = 32; 
     size_t TUNNING = 7; 
     size_t DEC_THREAD_NUM = 4;
     size_t IO_THREAD_NUM = 4;      
+    Twisted_ElGamal_Setup(pp_tt, MSG_LEN, TUNNING, DEC_THREAD_NUM, IO_THREAD_NUM);
+    Twisted_ElGamal_Initialize(pp_tt); 
+
+    Twisted_ElGamal_KP pp_tt_keypair;
+    Twisted_ElGamal_KP_new(pp_tt_keypair); 
+    Twisted_ElGamal_KeyGen(pp_tt, pp_tt_keypair); 
+
+    Twisted_ElGamal_PP enc_pp; 
+    Twisted_ElGamal_PP_new(enc_pp);     
     Twisted_ElGamal_Setup(enc_pp, MSG_LEN, TUNNING, DEC_THREAD_NUM, IO_THREAD_NUM);
     Twisted_ElGamal_Initialize(enc_pp); 
 
@@ -40,7 +49,7 @@ void test_protocol()
 
     COCO_Framework_PP pp;
     COCO_Framework_PP_new(pp);
-    COCO_Framework_Setup(pp, enc_pp.h, keypair.pk);
+    COCO_Framework_Setup(pp, enc_pp.h);
     COCO_Framework_Instance instance;
     COCO_Framework_Instance_new(instance);
     COCO_Framework_Witness witness;
@@ -120,10 +129,10 @@ void test_protocol()
     string chl = "";
 
 
-    COCO_Framework_Prove(pp, instance, witness, chl, proof);
+    COCO_Framework_Prove(pp, instance, witness, chl, proof, pp_tt_keypair.pk, keypair.pk, pp_tt);
 
     string res = "";
-    COCO_Framework_Verify(pp, instance, chl, proof, res);
+    COCO_Framework_Verify(pp, instance, chl, proof, res, pp_tt_keypair.pk, keypair.pk);
 
     bool Validity = (res == chl); 
 

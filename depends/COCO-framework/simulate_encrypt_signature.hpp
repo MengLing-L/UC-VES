@@ -99,8 +99,8 @@ void Simulation_Encrypt_Signature_Proof_print(Simulation_Encrypt_Signature_Proof
 
 
 
-void Simulation_Encrypt_Signature_Setup(Simulation_Encrypt_Signature_PP &pp, EC_POINT* &h, EC_POINT* &EK){
-    SIGMA_DLOG_Setup(pp.dlog_pp, h, EK, true);
+void Simulation_Encrypt_Signature_Setup(Simulation_Encrypt_Signature_PP &pp, EC_POINT* &h){
+    SIGMA_DLOG_Setup(pp.dlog_pp, h, true);
 }
 
 
@@ -108,9 +108,10 @@ void Simulation_Encrypt_Signature_Simulate_Proof(Simulation_Encrypt_Signature_PP
                             Simulation_Encrypt_Signature_Instance &instance,
                             string &chl,
                             string &chl1, 
-                            Simulation_Encrypt_Signature_Proof &proof){
+                            Simulation_Encrypt_Signature_Proof &proof,
+                            EC_POINT* &EK){
     
-    SIGMA_DLOG_Simulate_Proof(pp.dlog_pp, instance.dlog_instance, chl, chl1, proof.dlog_proof);
+    SIGMA_DLOG_Simulate_Proof(pp.dlog_pp, instance.dlog_instance, chl, chl1, proof.dlog_proof, EK);
 
 }
 
@@ -118,10 +119,11 @@ void Simulation_Encrypt_Signature_Simulate_Proof(Simulation_Encrypt_Signature_PP
 bool Simulation_Encrypt_Signature_Verify(Simulation_Encrypt_Signature_PP &pp, 
                             Simulation_Encrypt_Signature_Instance &instance, 
                             string &chl, 
-                            Simulation_Encrypt_Signature_Proof &proof){
+                            Simulation_Encrypt_Signature_Proof &proof,
+                            EC_POINT* &EK){
 
     
-    SIGMA_DLOG_Verify(pp.dlog_pp, instance.dlog_instance, chl, proof.dlog_proof);
+    SIGMA_DLOG_Verify(pp.dlog_pp, instance.dlog_instance, chl, proof.dlog_proof, EK);
 
 }
 
@@ -129,10 +131,11 @@ bool Simulation_Encrypt_Signature_Verify(Simulation_Encrypt_Signature_PP &pp,
                             Simulation_Encrypt_Signature_Instance &instance, 
                             string &chl, 
                             Simulation_Encrypt_Signature_Proof &proof,
-                            string &res){
+                            string &res,
+                            EC_POINT* &EK){
 
     
-    SIGMA_DLOG_Verify(pp.dlog_pp, instance.dlog_instance, chl, proof.dlog_proof, res);
+    SIGMA_DLOG_Verify(pp.dlog_pp, instance.dlog_instance, chl, proof.dlog_proof, res, EK);
 
 }
 

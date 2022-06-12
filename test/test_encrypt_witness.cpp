@@ -32,7 +32,7 @@ void test_protocol()
 
     Witness_Encryption_AndR_PP pp;
     Witness_Encryption_AndR_PP_new(pp);
-    Witness_Encryption_AndR_Setup(pp, enc_pp.h, keypair.pk);
+    Witness_Encryption_AndR_Setup(pp, enc_pp.h);
     Witness_Encryption_AndR_Instance instance;
     Witness_Encryption_AndR_Instance_new(instance);
     Witness_Encryption_AndR_Witness witness;
@@ -73,9 +73,9 @@ void test_protocol()
 
     BN_random(m);
     string chl = BN_bn2string(m);
-    Witness_Encryption_AndR_Prove(pp, instance, witness, chl, proof);
+    Witness_Encryption_AndR_Prove(pp, instance, witness, chl, proof, keypair.pk, keypair.pk);
 
-    Witness_Encryption_AndR_Verify(pp, instance, chl, proof);
+    Witness_Encryption_AndR_Verify(pp, instance, chl, proof, keypair.pk, keypair.pk);
 
 
     Twisted_ElGamal_PP_free(enc_pp); 
