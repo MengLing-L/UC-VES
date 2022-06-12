@@ -31,6 +31,7 @@ int curve_id = NID_secp256k1
 #include <openssl/sha.h>
 #include <openssl/err.h>
 
+
 using namespace std;
 
 /* global constants */
@@ -93,6 +94,7 @@ void global_finalize()
     BN_free(BN_1); 
     BN_free(BN_2); 
 }
+
 
 #endif
 

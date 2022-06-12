@@ -485,6 +485,79 @@ void Twisted_ElGamal_Parallel_ScalarMul(Twisted_ElGamal_CT &CT_result, Twisted_E
     scalar_thread2.join(); 
 }
 
+void recovery_bignum_from_dec_nums(vector<BIGNUM *> &ret_num, BIGNUM* &m, Twisted_ElGamal_PP &pp){
+    BIGNUM *recover_num = BN_new();
+    BIGNUM *tmp = BN_new();
+    for(int j=0; j<ret_num.size(); j++){
+        BN_set_word(tmp, pp.MSG_LEN*(ret_num.size()-j-1));
+        BN_mod_exp(tmp, BN_2, tmp, order, bn_ctx);
+        BN_mul(tmp, ret_num[j], tmp, bn_ctx);
+        BN_add(recover_num, recover_num, tmp);
+    }
+    //BN_print(recover_num, "recover_num");
+    bool Validity = (BN_ucmp(recover_num, m) == 0);
+    BN_print(recover_num, "recovery_number");
+    BN_print(m, "m");
+    if (Validity) 
+    { 
+        cout<< "recovery accept >>>" << endl; 
+    }
+    else 
+    {
+        cout<< "recovery reject >>>" << endl; 
+    }
+    BN_free(recover_num);
+    BN_free(tmp);
+}
+
+void get_32bit_4bytes_BigNumVec(vector<BIGNUM *> &ret_num, BIGNUM* &m, Twisted_ElGamal_PP &pp){
+    unsigned char buffer[BN_LEN];
+    BN_bn2bin(m, buffer);
+    int ENC_SIZE = 4;
+    char dest[ENC_SIZE];
+    memset(dest, '\0', sizeof(dest));
+    for(int i=0; i<(int)(BN_LEN/ENC_SIZE);i++){    
+        strncpy(dest, (char *)(buffer + i*ENC_SIZE), ENC_SIZE);
+        BN_bin2bn((unsigned char*)dest, 4, ret_num[i]);      
+        //BN_print(ret_num[i]);
+    }
+    recovery_bignum_from_dec_nums(ret_num, m, pp);
+}
+
+void getU(EC_POINT* &U, vector<Twisted_ElGamal_CT> &CT, Twisted_ElGamal_PP &pp_tt){
+    BIGNUM *tmp = BN_new();
+    EC_POINT *point = EC_POINT_new(group);
+    for(int i=0;i<CT.size(); i++){
+        BN_set_word(tmp, pp_tt.MSG_LEN*(CT.size()-i-1)); //tmp = 32*(size-i-1)
+        BN_mod_exp(tmp, BN_2, tmp, order, bn_ctx); // tmp = 2^32*(size-i-1)
+        EC_POINT_mul(group, point, NULL, CT[i].Y, tmp, bn_ctx); // point = ui^(2^32*(size-i-1))
+        if(i==0){
+            EC_POINT_copy(U, point); 
+        }else{
+            EC_POINT_add(group, U, U, point, bn_ctx); // U = U*ui^(2^32*(size-i-1))
+        }
+    }
+    BN_free(tmp);
+    EC_POINT_free(point);
+}
+
+void getV(EC_POINT* &V, vector<Twisted_ElGamal_CT> &CT, Twisted_ElGamal_PP &pp_tt){
+    BIGNUM *tmp = BN_new();
+    EC_POINT *point = EC_POINT_new(group);
+    for(int i=0;i<CT.size(); i++){
+        BN_set_word(tmp, pp_tt.MSG_LEN*(CT.size()-i-1));
+        BN_mod_exp(tmp, BN_2, tmp, order, bn_ctx);
+        EC_POINT_mul(group, point, NULL, CT[i].X, tmp, bn_ctx);
+        if(i==0){
+            EC_POINT_copy(V, point); 
+        }else{
+            EC_POINT_add(group, V, V, point, bn_ctx); 
+        }
+    }
+    BN_free(tmp);
+    EC_POINT_free(point);
+}
+
 #endif
 
 
