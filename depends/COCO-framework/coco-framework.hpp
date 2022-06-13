@@ -112,7 +112,7 @@ void COCO_Framework_Prove(COCO_Framework_PP &pp,
                             COCO_Framework_Proof &proof,
                             EC_POINT* &EK,
                             EC_POINT* &EK1,
-                            Twisted_ElGamal_PP &pp_tt){
+                            Twisted_ElGamal_PP &pp_ttpp_enc_wit){
     //hard code C
     
 

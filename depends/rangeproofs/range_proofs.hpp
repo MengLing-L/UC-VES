@@ -12,11 +12,12 @@ this hpp implements NIZKPoK for discrete logarithm equality
 #include "../common/hash.hpp"
 #include "../common/print.hpp"
 #include "../common/routines.hpp"
+size_t VECTOR_LEN = 4;
 
 struct Range_PP
 {
     EC_POINT *g, *h; 
-    size_t VECTOR_LEN; // VECTOR_LEN = 4;
+     // VECTOR_LEN = 4;
 };
 
 struct Range_Instance
@@ -48,55 +49,55 @@ struct Range_Proof
     BIGNUM *sigma;
 };
 
-void NIZK_Range_PP_new(Range_PP &pp){
+void Range_PP_new(Range_PP &pp){
     pp.g = EC_POINT_new(group);
     pp.h = EC_POINT_new(group);
 }
 
-void NIZK_Range_PP_free(Range_PP &pp)
+void Range_PP_free(Range_PP &pp)
 { 
     EC_POINT_free(pp.g); 
     EC_POINT_free(pp.h); 
 }
 
-void NIZK_Range_Instance_new(Range_Instance &instance)
+void Range_Instance_new(Range_Instance &instance)
 {
     
     instance.C = EC_POINT_new(group);
 }
 
-void NIZK_Range_Instance_free(Range_Instance &instance)
+void Range_Instance_free(Range_Instance &instance)
 {
     EC_POINT_free(instance.C);
 }
 
-void NIZK_Range_Witness_new(Range_Witness &witness)
+void Range_Witness_new(Range_Witness &witness)
 {
     witness.w = BN_new();
     witness.r = BN_new();
 }
 
-void NIZK_Range_Witness_free(Range_Witness &witness)
+void Range_Witness_free(Range_Witness &witness)
 {
     BN_free(witness.w);
     BN_free(witness.r);
 }
 
-void NIZK_Range_Proof_new(Range_Proof &proof, Range_PP &pp)
+void Range_Proof_new(Range_Proof &proof)
 {
     //chl = "";
     proof.tau = BN_new();
-    proof.c.resize(pp.VECTOR_LEN); 
-    proof.z.resize(pp.VECTOR_LEN); 
-    proof.t.resize(pp.VECTOR_LEN); 
+    proof.c.resize(VECTOR_LEN); 
+    proof.z.resize(VECTOR_LEN); 
+    proof.t.resize(VECTOR_LEN); 
     ECP_vec_new(proof.c);
     BN_vec_new(proof.z); 
     BN_vec_new(proof.t);
 
-    proof.x.resize(pp.VECTOR_LEN); 
-    proof.r.resize(pp.VECTOR_LEN); 
-    proof.m.resize(pp.VECTOR_LEN); 
-    proof.s.resize(pp.VECTOR_LEN);
+    proof.x.resize(VECTOR_LEN); 
+    proof.r.resize(VECTOR_LEN); 
+    proof.m.resize(VECTOR_LEN); 
+    proof.s.resize(VECTOR_LEN);
     BN_vec_new(proof.x);
     BN_vec_new(proof.r); 
     BN_vec_new(proof.m);
@@ -105,7 +106,7 @@ void NIZK_Range_Proof_new(Range_Proof &proof, Range_PP &pp)
     proof.sigma = BN_new();
 }
 
-void NIZK_Range_Proof_free(Range_Proof &proof)
+void Range_Proof_free(Range_Proof &proof)
 {
   
     ECP_vec_free(proof.c);
@@ -125,7 +126,7 @@ void Range_PP_print(Range_PP &pp)
     cout << "Range Proofs Public parameters >>> " << endl;
     ECP_print(pp.g, "pp.g"); 
     ECP_print(pp.h, "pp.h"); 
-    cout << "VECTOR_LEN: " << pp.VECTOR_LEN << endl;
+    cout << "VECTOR_LEN: " << VECTOR_LEN << endl;
 }
 
 void Range_Instance_print(Range_Instance &instance)
@@ -169,14 +170,13 @@ void Range_Proof_deserialize(Range_Proof &proof, ifstream &fin)
 } 
 
 
-void NIZK_Range_Setup(Range_PP &pp, EC_POINT* &h, size_t VECTOR_LEN){
+void Range_Setup(Range_PP &pp, EC_POINT* &h){
     EC_POINT_copy(pp.g, h); 
     //EC_POINT_copy(pp.h, h);
     EC_POINT_copy(pp.h, generator);
-    pp.VECTOR_LEN = VECTOR_LEN;
 }
 
-void NIZK_Range_Prove_Compute_Chl(Range_PP &pp, 
+void Range_Prove_Commit(Range_PP &pp, 
                             Range_Instance &instance, 
                             Range_Witness &witness, 
                             string &chl,
@@ -209,11 +209,11 @@ void NIZK_Range_Prove_Compute_Chl(Range_PP &pp,
     EC_POINT *D_tmp = EC_POINT_new(group);
     EC_POINT *Cinvm_sum = EC_POINT_new(group);
     
-    vector<EC_POINT *> d(pp.VECTOR_LEN);
+    vector<EC_POINT *> d(VECTOR_LEN);
     ECP_vec_new(d);
-    //vector<EC_POINT *> c(pp.VECTOR_LEN);
+    //vector<EC_POINT *> c(VECTOR_LEN);
     //ECP_vec_new(c);
-    vector<EC_POINT *> c_minv(pp.VECTOR_LEN);
+    vector<EC_POINT *> c_minv(VECTOR_LEN);
     ECP_vec_new(c_minv);
 
     BN_set_word(FOUR, 4);
@@ -301,7 +301,7 @@ void NIZK_Range_Prove_Compute_Chl(Range_PP &pp,
     EC_POINTs_mul(group, proof.c[0], NULL, 2, vec_A, vec_x, bn_ctx);// c^-1 g^B
     //ECP_print(proof.c[0], "proof.c[0]");
     
-    for (int i=1; i < pp.VECTOR_LEN; i++){
+    for (int i=1; i < VECTOR_LEN; i++){
         BN_random (proof.r[i]);
         BN_mod (proof.r[i], proof.r[i], B, bn_ctx);
         vec_A[0] = pp.g; 
@@ -311,7 +311,7 @@ void NIZK_Range_Prove_Compute_Chl(Range_PP &pp,
         EC_POINTs_mul(group, proof.c[i], NULL, 2, vec_A, vec_x, bn_ctx); // g^x_i h^r_i
     }
 
-    for (int i=0; i < pp.VECTOR_LEN; i++){
+    for (int i=0; i < VECTOR_LEN; i++){
         BN_random (proof.m[i]);
         BN_mod (proof.m[i], proof.m[i], B, bn_ctx);
         BN_random (proof.s[i]);
@@ -327,7 +327,7 @@ void NIZK_Range_Prove_Compute_Chl(Range_PP &pp,
     BN_mod (proof.sigma, proof.sigma, B, bn_ctx);
 
 
-    for (int i=0; i < pp.VECTOR_LEN; i++){
+    for (int i=0; i < VECTOR_LEN; i++){
         EC_POINT_mul(group, c_minv[i], NULL, proof.c[i], proof.m[i], bn_ctx);// c_i^m_i
         EC_POINT_invert(group, c_minv[i], bn_ctx);// c_i^-m_i
     }
@@ -360,7 +360,7 @@ void NIZK_Range_Prove_Compute_Chl(Range_PP &pp,
     vec_x[1] = BN_1;
     EC_POINTs_mul(group, D, NULL, 2, vec_A, vec_x, bn_ctx); // h^sigma c^4m_0 c_1^-m_1 c_2^-m_2 c_3^-m_3
 
-    for (int i=0; i < pp.VECTOR_LEN; i++){
+    for (int i=0; i < VECTOR_LEN; i++){
         chl += ECP_ep2string(d[i]);
     }
 
@@ -368,7 +368,7 @@ void NIZK_Range_Prove_Compute_Chl(Range_PP &pp,
     
     //Compute challenge
 
-    Range_Proof_print(proof);
+    //Range_Proof_print(proof);
     
 
     BN_free(sum); 
@@ -390,7 +390,7 @@ void NIZK_Range_Prove_Compute_Chl(Range_PP &pp,
     ECP_vec_free(c_minv);
 }
 
-void NIZK_Range_Prove_Compute_Proof(Range_PP &pp, 
+void Range_Prove_Res(Range_PP &pp, 
                             Range_Instance &instance, 
                             Range_Witness &witness,
                             string &chl, 
@@ -410,7 +410,7 @@ void NIZK_Range_Prove_Compute_Proof(Range_PP &pp,
     Hash_String_to_BN(chl, e);
 
 
-    for (int i=0; i < pp.VECTOR_LEN; i++){
+    for (int i=0; i < VECTOR_LEN; i++){
         BN_mul (proof.z[i], e, proof.x[i], bn_ctx); // chl*x_i
         BN_add (proof.z[i], proof.z[i], proof.m[i]); // m_i + chl*x_i
 
@@ -419,7 +419,7 @@ void NIZK_Range_Prove_Compute_Proof(Range_PP &pp,
     }
 
     BN_set_word (x_r_sum, 0);
-    for (int i=1; i < pp.VECTOR_LEN; i++){
+    for (int i=1; i < VECTOR_LEN; i++){
         BN_set_word (tmp_sum1, 1);
         BN_mul (tmp_sum1, tmp_sum1, proof.x[i], bn_ctx);
         BN_mul (tmp_sum1, tmp_sum1, proof.r[i], bn_ctx); // x_ir_i
@@ -449,9 +449,8 @@ void NIZK_Range_Prove_Compute_Proof(Range_PP &pp,
 }
 
 
-void NIZK_Range_Verify(Range_PP &pp, 
+void Range_Verify(Range_PP &pp, 
                             Range_Instance &instance, 
-                            Range_Witness &witness, 
                             string &chl,
                             Range_Proof &proof,
                             string &res){
@@ -459,12 +458,12 @@ void NIZK_Range_Verify(Range_PP &pp,
     const EC_POINT *vec_A[3]; 
     const BIGNUM *vec_x[3];
 
-    vector<EC_POINT *> c_invchl(pp.VECTOR_LEN);
+    vector<EC_POINT *> c_invchl(VECTOR_LEN);
     ECP_vec_new(c_invchl);
-    vector<EC_POINT *> f(pp.VECTOR_LEN);
+    vector<EC_POINT *> f(VECTOR_LEN);
     ECP_vec_new(f);
     EC_POINT *F = EC_POINT_new(group);
-    vector<EC_POINT *> c_zinv(pp.VECTOR_LEN);
+    vector<EC_POINT *> c_zinv(VECTOR_LEN);
     ECP_vec_new(c_zinv);
     EC_POINT *Cinvz_sum = EC_POINT_new(group);
     BIGNUM *FOUR_z_0 = BN_new();
@@ -480,7 +479,7 @@ void NIZK_Range_Verify(Range_PP &pp,
 
 
 
-    for (int i=0; i < pp.VECTOR_LEN; i++){
+    for (int i=0; i < VECTOR_LEN; i++){
         EC_POINT_mul (group, c_invchl[i], NULL, proof.c[i], e, bn_ctx);
         EC_POINT_invert (group, c_invchl[i], bn_ctx);
 
@@ -495,7 +494,7 @@ void NIZK_Range_Verify(Range_PP &pp,
     }
     
 
-    for (int i=1; i < pp.VECTOR_LEN; i++){
+    for (int i=1; i < VECTOR_LEN; i++){
         EC_POINT_mul(group, c_zinv[i], NULL, proof.c[i], proof.z[i], bn_ctx);// c_i^z_i
         EC_POINT_invert(group, c_zinv[i], bn_ctx);// c_i^-z_i
     }
@@ -527,7 +526,7 @@ void NIZK_Range_Verify(Range_PP &pp,
 
     //string res = "";
 
-    for (int i=0; i < pp.VECTOR_LEN; i++){
+    for (int i=0; i < VECTOR_LEN; i++){
         res = res + ECP_ep2string(f[i]);
     }
 

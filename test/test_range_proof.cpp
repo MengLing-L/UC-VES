@@ -28,15 +28,15 @@ void test_protocol()
     Twisted_ElGamal_CT_new(CT); 
     cout << "Initialization >>>" << endl;
     Range_PP pp;
-    NIZK_Range_PP_new(pp);
+    Range_PP_new(pp);
     Range_Instance instance;
-    NIZK_Range_Instance_new(instance);
+    Range_Instance_new(instance);
     Range_Witness witness;
-    NIZK_Range_Witness_new(witness);
-    NIZK_Range_Setup(pp, enc_pp.h, 4);
+    Range_Witness_new(witness);
+    Range_Setup(pp, enc_pp.h);
     
     Range_Proof proof;
-    NIZK_Range_Proof_new(proof,pp);
+    Range_Proof_new(proof);
 
     
 
@@ -51,13 +51,13 @@ void test_protocol()
     EC_POINT_copy(instance.C, CT.Y);
 
     string chl = "";
-    NIZK_Range_Prove_Compute_Chl(pp, instance, witness, chl, proof);
+    Range_Prove_Commit(pp, instance, witness, chl, proof);
 
-    NIZK_Range_Prove_Compute_Proof(pp, instance, witness, chl, proof);
+    Range_Prove_Res(pp, instance, witness, chl, proof);
 
 
     string res = "";
-    NIZK_Range_Verify(pp, instance, witness, chl, proof, res);
+    Range_Verify(pp, instance, chl, proof, res);
 
     if (res == chl){
 	cout << "Range proof accept." << endl;
@@ -65,10 +65,10 @@ void test_protocol()
     	cout << "res: " << res << endl;
     }
 
-    NIZK_Range_PP_free(pp);
-    NIZK_Range_Instance_free(instance);
-    NIZK_Range_Witness_free(witness);
-    NIZK_Range_Proof_free(proof);
+    Range_PP_free(pp);
+    Range_Instance_free(instance);
+    Range_Witness_free(witness);
+    Range_Proof_free(proof);
 
 }
 
