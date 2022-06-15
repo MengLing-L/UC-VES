@@ -15,11 +15,6 @@ this hpp implements NIZKPoK for discrete logarithm equality
 #include <map>
 size_t VECTOR_LEN = 4;
 
-std::map<string, vector<char *>> squares_map{
-    {"F537DC81ED1EF001", {"f3d8afe2","251e477b","2c02f136"}},
-    //{},
-};
-
 struct Range_PP
 {
     EC_POINT *g, *h; 
@@ -241,7 +236,7 @@ void Range_Prove_Commit(Range_PP &pp,
     //BN_mod (sum, sum, B, bn_ctx);
 
     //BN_set_word (sum, 30);
-    BN_print(sum, "sum");
+    //BN_print(sum, "sum");
     //BN_mul (tmp_sum0, proof.x[0], proof.x[0], bn_ctx); // x_0^2
 
 
@@ -281,9 +276,18 @@ void Range_Prove_Commit(Range_PP &pp,
         BN_set_word (proof.x[2], 0);
     }*/
     string index = BN_bn2string(sum);
-    BN_hex2bn(&proof.x[1], squares_map[index][0]);
-    BN_hex2bn(&proof.x[2], squares_map[index][1]);
-    BN_hex2bn(&proof.x[3], squares_map[index][1]);
+    index = "./3squares " + index;
+
+    string res = exec(index.c_str());
+    vector<string> elems = stringSplit(res, ' ');
+    vector<unsigned long int> inter(elems.size());
+
+    for (int i = 0; i < elems.size()-1; ++i)
+    {
+        inter[i] = std::stoul (elems[i], 0, 10);
+        //cout << inter[i] << endl;
+        BN_set_word (proof.x[i+1], inter[i]);
+    }
     //BN_set_word (proof.x[1], 2504069926);
     //BN_set_word (proof.x[2], 869357514);
     //BN_set_word (proof.x[3], 3067414581);
@@ -576,5 +580,7 @@ void Range_Verify(Range_PP &pp,
     //return Validity;
 
 }
+
+
 
 #endif

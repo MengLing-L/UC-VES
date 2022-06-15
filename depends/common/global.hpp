@@ -24,6 +24,7 @@ int curve_id = NID_secp256k1
 #include <vector>
 #include <unordered_map>
 #include <thread>
+#include <array>
 
 #include <openssl/obj_mac.h>
 #include <openssl/ec.h>

@@ -227,5 +227,32 @@ inline bool FILE_exist(const string& filename)
     return existing_flag; 
 }
 
+//string exec(const char* cmd) {
+string exec(const char* cmd) {
+    std::array<char, 128> buffer;
+    std::string result;
+    std::unique_ptr<FILE, decltype(&pclose)> pipe(popen(cmd, "r"), pclose);
+    if (!pipe) {
+        throw std::runtime_error("popen() failed!");
+    }
+    while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr) {
+        result += buffer.data();
+    }
+    return result;
+}
+
+std::vector<std::string> stringSplit(const std::string& strIn, char delim) {
+    char* str = const_cast<char*>(strIn.c_str());
+    std::string s;
+    s.append(1, delim);
+    std::vector<std::string> elems;
+    char* splitted = strtok(str, s.c_str());
+    while (splitted != NULL) {
+        elems.push_back(std::string(splitted));
+        splitted = strtok(NULL, s.c_str());
+    }
+    return elems;
+}
+
 #endif
 
