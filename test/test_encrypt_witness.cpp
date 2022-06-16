@@ -178,6 +178,19 @@ void test_protocol()
     string res = "";
     Witness_Encryption_AndR_Verify(pp, instance, chl, proof, res, keypair.pk, keypair.pk);
 
+    bool Validity = (res == chl);
+
+
+    if (Validity){
+        cout<< "DLOG Proof Accepts >>>" << endl;
+        cout<< "chl: " << chl << endl;
+        cout<< "H(*): " << res << endl;
+    }
+    else{
+        cout<< "DLOG Proof Rejects >>>" << endl;
+        cout<< "chl: " << chl << endl;
+        cout<< "H(*): " << res << endl;
+    }
 
     Twisted_ElGamal_PP_free(enc_pp); 
     Twisted_ElGamal_KP_free(keypair); 
