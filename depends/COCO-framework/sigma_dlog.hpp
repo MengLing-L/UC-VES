@@ -252,7 +252,7 @@ void SIGMA_DLOG_Res(SIGMA_DLOG_PP &pp,
 
 
     #ifdef DEBUG
-    SIGMA_DLOG_Proof_print(proof); 
+        SIGMA_DLOG_Proof_print(proof); 
     #endif
 
     

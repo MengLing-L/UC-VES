@@ -1,4 +1,4 @@
-#define DEBUG
+//#define DEBUG
 
 #include "../depends/COCO-framework/coco-framework.hpp"
 #include "../depends/twisted_elgamal/twisted_elgamal.hpp"
@@ -81,7 +81,7 @@ void test_protocol()
     for(int i=0; i<split_each_4bytes_m.size(); i++){
         BN_random(each_4bytes_m_beta[i]);
         BN_mod(split_each_4bytes_m[i], split_each_4bytes_m[i], enc_pp.BN_MSG_SIZE, bn_ctx);
-        BN_print(split_each_4bytes_m[i], "split_each_4bytes_m");
+        //BN_print(split_each_4bytes_m[i], "split_each_4bytes_m");
         Twisted_ElGamal_Enc(enc_pp, keypair.pk, split_each_4bytes_m[i], each_4bytes_m_beta[i], each_4bytes_m_res_U_V[i]);     
     }
 
@@ -91,6 +91,12 @@ void test_protocol()
         BN_mod_exp(tmp, BN_2, tmp, order, bn_ctx);
         BN_mod_mul(tmp, each_4bytes_m_beta[j], tmp, order, bn_ctx);
         BN_mod_add(witness.witness.enc_witness_witness.dlog_witness[2].gamma, witness.witness.enc_witness_witness.dlog_witness[2].gamma, tmp, order, bn_ctx);
+    }
+
+    for(int j=0; j < split_each_4bytes_m.size(); j++){
+        BN_copy(witness.witness.enc_witness_witness.range_witness[2][j].w, split_each_4bytes_m[j]);
+        BN_copy(witness.witness.enc_witness_witness.range_witness[2][j].r, each_4bytes_m_beta[j]);
+        EC_POINT_copy(instance.instance.enc_witness_instance.range_instance[2][j].C, each_4bytes_m_res_U_V[j].Y);
     }
     
     BN_copy(witness.witness.enc_witness_witness.dlog_witness[2].w, signature_result.s);
@@ -104,11 +110,20 @@ void test_protocol()
     EC_POINT_copy(instance.instance.enc_witness_instance.dlog_instance[2].A, signature_result.A);
 
     string chl = "";
-
+    auto start_time = chrono::steady_clock::now();
     COCO_Framework_Prove(pp, instance, witness, chl, proof, pp_enc_wit_keypair.pk, keypair.pk, pp_enc_wit);
+    auto end_time = chrono::steady_clock::now(); // end to count the time
+    auto running_time = end_time - start_time;
+    cout << "COCO framework proving phase takes time = "
+    << chrono::duration <double, milli> (running_time).count() << " ms" << endl;
 
     string res = "";
+    start_time = chrono::steady_clock::now();
     COCO_Framework_Verify(pp, instance, chl, proof, res, pp_enc_wit_keypair.pk, keypair.pk);
+    end_time = chrono::steady_clock::now(); // end to count the time
+    running_time = end_time - start_time;
+    cout << "COCO framework verifing phase takes time = "
+    << chrono::duration <double, milli> (running_time).count() << " ms" << endl;
 
     bool Validity = (res == chl); 
 
@@ -126,7 +141,6 @@ void test_protocol()
     
     Twisted_ElGamal_PP_free(enc_pp); 
     Twisted_ElGamal_KP_free(keypair); 
-    Twisted_ElGamal_CT_free(CT); 
 
     COCO_Framework_PP_free(pp);
     COCO_Framework_Instance_free(instance);

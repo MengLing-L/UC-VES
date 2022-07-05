@@ -296,11 +296,13 @@ void Range_Prove_Commit(Range_PP &pp,
     BN_mul (tmp_sum3, proof.x[3], proof.x[3], bn_ctx); //x_3^2
     BN_add (tmp_sum, tmp_sum1, tmp_sum2); //x_1^2 + x_2^2
     BN_add (tmp_sum, tmp_sum, tmp_sum3); //x_3^2 + x_1^2 + x_2^2
-    BN_print(tmp_sum, "tmp_sum");
+    //BN_print(tmp_sum, "tmp_sum");
     if (BN_cmp(tmp_sum, sum) == 0){
-        BN_print(proof.x[1], "proof.x[1]");
-        BN_print(proof.x[2], "proof.x[2]");
-        BN_print(proof.x[3], "proof.x[3]");
+        #ifdef DEBUG
+            BN_print(proof.x[1], "proof.x[1]");
+            BN_print(proof.x[2], "proof.x[2]");
+            BN_print(proof.x[3], "proof.x[3]");
+        #endif
     }
 
     BN_copy(proof.r[0], witness.r);
@@ -454,8 +456,9 @@ void Range_Prove_Res(Range_PP &pp,
 
     BN_add (proof.tau, proof.tau, proof.sigma);
 
-    Range_Proof_print(proof);
-    
+    #ifdef DEBUG
+        Range_Proof_print(proof);
+    #endif
 
     BN_free(FOUR);
     BN_free(tmp_sum);

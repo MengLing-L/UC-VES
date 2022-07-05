@@ -179,10 +179,10 @@ void Twisted_ElGamal_Setup(Twisted_ElGamal_PP &pp, size_t MSG_LEN, size_t TUNNIN
     /* generate pp.h via deterministic manner */
     Hash_ECP_to_ECP(pp.g, pp.h); 
 
-    //#ifdef DEBUG
+    #ifdef DEBUG
     cout << "generate the public parameters for twisted ElGamal >>>" << endl; 
     Twisted_ElGamal_PP_print(pp); 
-    //endif
+    #endif
 }
 
 void Twisted_ElGamal_Initialize(Twisted_ElGamal_PP &pp)
@@ -204,10 +204,10 @@ void Twisted_ElGamal_KeyGen(Twisted_ElGamal_PP &pp, Twisted_ElGamal_KP &keypair)
     BN_random(keypair.sk); // sk \sample Z_p
     EC_POINT_mul(group, keypair.pk, keypair.sk, NULL, NULL, bn_ctx); // pk = g^sk  
 
-    //#ifdef DEBUG
+    #ifdef DEBUG
     cout << "key generation finished >>>" << endl;  
     Twisted_ElGamal_KP_print(keypair); 
-    //#endif
+    #endif
 }
 
 /* Encryption algorithm: compute CT = Enc(pk, m; r) */ 
@@ -495,6 +495,7 @@ void recovery_bignum_from_dec_nums(vector<BIGNUM *> &ret_num, BIGNUM* &m, Twiste
         BN_add(recover_num, recover_num, tmp);
     }
     //BN_print(recover_num, "recover_num");
+    #ifdef DEBUG
     bool Validity = (BN_ucmp(recover_num, m) == 0);
     BN_print(recover_num, "recovery_number");
     BN_print(m, "m");
@@ -506,6 +507,7 @@ void recovery_bignum_from_dec_nums(vector<BIGNUM *> &ret_num, BIGNUM* &m, Twiste
     {
         cout<< "recovery reject >>>" << endl; 
     }
+    #endif
     BN_free(recover_num);
     BN_free(tmp);
 }

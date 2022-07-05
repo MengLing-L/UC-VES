@@ -34,6 +34,6 @@ target_link_libraries(test_sigma_dlog ${OPENSSL_LIBRARIES})
 
 #target_link_libraries(test_encrypt_witness_or_encrypt_signature ${OPENSSL_LIBRARIES})
 
-#add_executable(test_cocoframework test/test_cocoframework.cpp)
+add_executable(test_cocoframework test/test_cocoframework.cpp)
 
-#target_link_libraries(test_cocoframework ${OPENSSL_LIBRARIES})
+target_link_libraries(test_cocoframework ${OPENSSL_LIBRARIES})

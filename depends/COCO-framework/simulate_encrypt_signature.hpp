@@ -112,7 +112,7 @@ void Simulation_Encrypt_Signature_Simulate_Proof(Simulation_Encrypt_Signature_PP
                             EC_POINT* &EK){
     
     SIGMA_DLOG_Simulate_Proof(pp.dlog_pp, instance.dlog_instance, chl, chl1, proof.dlog_proof, EK);
-
+    // to do, simulate the range proof for the invalid signature
 }
 
 
