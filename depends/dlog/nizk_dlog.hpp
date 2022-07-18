@@ -75,7 +75,6 @@ void NIZK_DLOG_Instance_free(DLOG_Instance &instance)
     
     EC_POINT_free(instance.A);
     EC_POINT_free(instance.B);
-    
 }
 
 void NIZK_DLOG_Witness_new(DLOG_Witness &witness)

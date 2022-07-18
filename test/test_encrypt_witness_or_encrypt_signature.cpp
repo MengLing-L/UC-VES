@@ -1,6 +1,6 @@
 #define DEBUG
 
-#include "../depends/COCO-framework/encrypt_witness_or_encrypt_signature.hpp"
+#include "../depends/COCO-framework/or_protocol.hpp"
 #include "../depends/twisted_elgamal/twisted_elgamal.hpp"
 #include <string.h>
 #include <vector> 

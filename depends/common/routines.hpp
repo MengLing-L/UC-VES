@@ -205,6 +205,17 @@ string ECP_ep2string(EC_POINT *&A)
     return ss.str();  
 }
 
+string ECP_ep2string(EC_POINT *&A, BN_CTX *&bn_CTX)
+{
+    // unsigned char buffer[POINT_LEN] = "";
+    // EC_POINT_point2oct(group, A, POINT_CONVERSION_COMPRESSED, buffer, POINT_LEN, bn_ctx);
+    // string ecp_str(reinterpret_cast<char *>(buffer), POINT_LEN); 
+    // return ecp_str; 
+    stringstream ss; 
+    ss << EC_POINT_point2hex(group, A, POINT_CONVERSION_COMPRESSED, bn_CTX);
+    return ss.str();  
+}
+
 /* convert a Big number to string */
 string BN_bn2string(BIGNUM *&a)
 {

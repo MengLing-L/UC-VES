@@ -12,7 +12,7 @@ this hpp implements NIZKPoK for discrete logarithm equality
 #include "../common/hash.hpp"
 #include "../common/print.hpp"
 #include "../common/routines.hpp"
-#include "../COCO-framework/encrypt_witness_or_encrypt_signature.hpp"
+#include "../COCO-framework/or_protocol.hpp"
 #include "../twisted_elgamal/twisted_elgamal.hpp"
 
 struct COCO_Framework_PP

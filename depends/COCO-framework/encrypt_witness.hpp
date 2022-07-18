@@ -12,7 +12,7 @@ this hpp implements NIZKPoK for discrete logarithm equality
 #include "../common/hash.hpp"
 #include "../common/print.hpp"
 #include "../common/routines.hpp"
-#include "../COCO-framework/sigma_dlog.hpp"
+#include "../dlog/sigma_dlog.hpp"
 #include "../twisted_elgamal/twisted_elgamal.hpp"
 #include "../rangeproofs/range_proofs.hpp"
 

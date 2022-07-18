@@ -241,7 +241,7 @@ void SIGMA_DLOG_Res(SIGMA_DLOG_PP &pp,
 {
        
     BIGNUM *e = BN_new(); 
-    Hash_String_to_BN(chl, e); // V's challenge in Zq; 
+    String_to_BN(chl, e); // V's challenge in Zq; 
 
     
     BN_mul (proof.z1, e, witness.w, bn_ctx); 
@@ -292,7 +292,7 @@ void SIGMA_DLOG_Prove(SIGMA_DLOG_PP &pp,
 
     
     BIGNUM *e = BN_new(); 
-    Hash_String_to_BN(chl, e); // V's challenge in Zq; 
+    String_to_BN(chl, e); // V's challenge in Zq; 
 
     
     BN_mul (proof.z1, e, witness.w, bn_ctx); 
@@ -322,7 +322,7 @@ void SIGMA_DLOG_Simulate_Proof(SIGMA_DLOG_PP &pp,
 {
 
     BIGNUM *e = BN_new(); 
-    Hash_String_to_BN(chl1, e);
+    String_to_BN(chl1, e);
     
     BN_random (proof.z1);
     BN_random (proof.z2);
@@ -384,7 +384,7 @@ void SIGMA_DLOG_Verify(SIGMA_DLOG_PP &pp,
     
     // compute the challenge
     BIGNUM *e = BN_new(); 
-    Hash_String_to_BN(chl, e); // V's challenge in Zq; 
+    String_to_BN(chl, e); // V's challenge in Zq; 
 
      
     const EC_POINT *vec_A[3]; 
@@ -491,7 +491,7 @@ void SIGMA_DLOG_Verify(SIGMA_DLOG_PP &pp,
     
     // compute the challenge
     BIGNUM *e = BN_new(); 
-    Hash_String_to_BN(chl, e); // V's challenge in Zq; 
+    String_to_BN(chl, e); // V's challenge in Zq; 
 
      
     const EC_POINT *vec_A[3]; 

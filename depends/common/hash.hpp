@@ -28,6 +28,28 @@ void Hash_String_to_BN(string &str, BIGNUM *&y)
     BN_nnmod(y, y, order, bn_ctx);
 }
 
+void String_to_BN(string &str, BIGNUM *&y)
+{ 
+    unsigned char output[HASH_OUTPUT_LEN]; 
+
+    char *buffer = const_cast<char *>(str.data()); 
+
+    BN_bin2bn(reinterpret_cast<unsigned char *>(buffer), str.length() * sizeof(char), y);
+
+    BN_nnmod(y, y, order, bn_ctx);
+}
+
+void String_to_BN(string &str, BIGNUM *&y, BN_CTX *&bn_CTX)
+{ 
+    unsigned char output[HASH_OUTPUT_LEN]; 
+
+    char *buffer = const_cast<char *>(str.data()); 
+
+    BN_bin2bn(reinterpret_cast<unsigned char *>(buffer), str.length() * sizeof(char), y);
+
+    BN_nnmod(y, y, order, bn_CTX);
+}
+
 void Hash_BN_to_BN(BIGNUM *&str, BIGNUM *&y)
 { 
     unsigned char buffer[BN_LEN];
