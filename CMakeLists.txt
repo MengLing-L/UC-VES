@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.2)
 # Project's name 
 project(libZKPPHE)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pthread -O0 -g")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pthread -O0 -g ")
 find_package(OpenSSL REQUIRED)
 
 include_directories(${OPENSSL_INCLUDE_DIR})
@@ -37,6 +37,7 @@ include_directories(${OPENSSL_INCLUDE_DIR})
 add_executable(test_cocoframework test/test_cocoframework.cpp)
 
 target_link_libraries(test_cocoframework ${OPENSSL_LIBRARIES})
+target_link_libraries(test_cocoframework -lgmp)
 
 #add_executable(test_modifyfis_sigma_dlog test/test_modifyfis_sigma_dlog.cpp)
 
@@ -53,3 +54,4 @@ target_link_libraries(test_cocoframework ${OPENSSL_LIBRARIES})
 add_executable(test_fischlin test/test_fischlin.cpp)
 
 target_link_libraries(test_fischlin ${OPENSSL_LIBRARIES})
+target_link_libraries(test_fischlin -lgmp)

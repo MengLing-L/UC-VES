@@ -199,7 +199,7 @@ void SIGMA_DLOG_Setup(SIGMA_DLOG_PP &pp, EC_POINT* &h, bool Sig_flag)
 void SIGMA_DLOG_Commit(SIGMA_DLOG_PP &pp, 
                               SIGMA_DLOG_Instance &instance, 
                               SIGMA_DLOG_Witness &witness,
-                              string &chl,
+                              //string &chl,
                               SIGMA_DLOG_Proof &proof,
                               EC_POINT* &EK)
 {
@@ -225,11 +225,42 @@ void SIGMA_DLOG_Commit(SIGMA_DLOG_PP &pp,
         EC_POINT_mul(group, proof.Y3, NULL, instance.B, proof.phi_w, bn_ctx);
     } 
 
-    chl += ECP_ep2string(proof.Y1) + ECP_ep2string(proof.Y2); 
+    //chl += ECP_ep2string(proof.Y1) + ECP_ep2string(proof.Y2); 
 
+    //if(pp.Sig_flag){
+        //chl += ECP_ep2string(proof.Y3);
+    //}
+
+}
+
+void SIGMA_DLOG_Copy(SIGMA_DLOG_PP &pp,
+                    SIGMA_DLOG_Proof &org_proof,
+                    SIGMA_DLOG_Proof &tar_proof)
+{
+    
+    // begin to generate proof
+    //BIGNUM *phi_w = BN_new(); 
+    //BN_random(proof.phi_w); 
+    BN_copy(tar_proof.phi_w, org_proof.phi_w);
+    //BIGNUM *phi_gamma = BN_new(); 
+    //BN_random(proof.phi_gamma);
+    BN_copy(tar_proof.phi_gamma, org_proof.phi_gamma);
+
+    //EC_POINT_mul(group, Y1, phi_w, pp.h, phi_gamma, bn_ctx); 
+
+    EC_POINT_copy(tar_proof.Y1, org_proof.Y1);
+    
+    EC_POINT_copy(tar_proof.Y2, org_proof.Y2);
+    
     if(pp.Sig_flag){
-        chl += ECP_ep2string(proof.Y3);
-    }
+        EC_POINT_copy(tar_proof.Y3, org_proof.Y3);
+    } 
+
+    //chl += ECP_ep2string(proof.Y1) + ECP_ep2string(proof.Y2); 
+
+    //if(pp.Sig_flag){
+        //chl += ECP_ep2string(proof.Y3);
+    //}
 
 }
 
@@ -257,6 +288,35 @@ void SIGMA_DLOG_Res(SIGMA_DLOG_PP &pp,
 
     
     BN_free(e);
+    
+}
+
+
+
+void SIGMA_DLOG_Res(SIGMA_DLOG_PP &pp, 
+                              SIGMA_DLOG_Instance &instance, 
+                              SIGMA_DLOG_Witness &witness,
+                              BIGNUM *&e,  
+                              SIGMA_DLOG_Proof &proof)
+{
+       
+    //BIGNUM *e = BN_new(); 
+    //String_to_BN(chl, e); // V's challenge in Zq; 
+
+    
+    BN_mul (proof.z1, e, witness.w, bn_ctx); 
+    BN_sub (proof.z1, proof.phi_w, proof.z1);
+
+    BN_mul (proof.z2, e, witness.gamma, bn_ctx); 
+    BN_sub (proof.z2, proof.phi_gamma, proof.z2);
+
+
+    #ifdef DEBUG
+        SIGMA_DLOG_Proof_print(proof); 
+    #endif
+
+    
+    //BN_free(e);
     
 }
 
@@ -315,14 +375,13 @@ void SIGMA_DLOG_Prove(SIGMA_DLOG_PP &pp,
 
 void SIGMA_DLOG_Simulate_Proof(SIGMA_DLOG_PP &pp, 
                               SIGMA_DLOG_Instance &instance,  
-                              string &chl, 
-                              string &chl1,
+                              BIGNUM *&e,
                               SIGMA_DLOG_Proof &proof,
                               EC_POINT* &EK)
 {
 
-    BIGNUM *e = BN_new(); 
-    String_to_BN(chl1, e);
+    //BIGNUM *e = BN_new(); 
+    //String_to_BN(chl1, e);
     
     BN_random (proof.z1);
     BN_random (proof.z2);
@@ -354,24 +413,18 @@ void SIGMA_DLOG_Simulate_Proof(SIGMA_DLOG_PP &pp,
         EC_POINTs_mul(group, proof.Y3, NULL, 2, vec_A, vec_x, bn_ctx); 
     }
 
-    chl += ECP_ep2string(proof.Y1) + ECP_ep2string(proof.Y2); 
-
-    if(pp.Sig_flag){
-        chl += ECP_ep2string(proof.Y3);
-    }
     #ifdef DEBUG
     SIGMA_DLOG_Proof_print(proof); 
     #endif
-    BN_free(e);
 }
 
 /*
     Check if PI is a valid NIZK proof for statenent (G1^w = H1 and G2^w = H2)
 */
 
-void SIGMA_DLOG_Verify(SIGMA_DLOG_PP &pp, 
+bool SIGMA_DLOG_Verify(SIGMA_DLOG_PP &pp, 
                                SIGMA_DLOG_Instance &instance,
-                               string &chl, 
+                               BIGNUM *&e, 
                                SIGMA_DLOG_Proof &proof,
                                EC_POINT* &EK)
 {
@@ -383,8 +436,8 @@ void SIGMA_DLOG_Verify(SIGMA_DLOG_PP &pp,
 
     
     // compute the challenge
-    BIGNUM *e = BN_new(); 
-    String_to_BN(chl, e); // V's challenge in Zq; 
+    //BIGNUM *e = BN_new(); 
+    //String_to_BN(chl, e); // V's challenge in Zq; 
 
      
     const EC_POINT *vec_A[3]; 
@@ -423,7 +476,8 @@ void SIGMA_DLOG_Verify(SIGMA_DLOG_PP &pp,
     if(pp.Sig_flag){
         V3 = (EC_POINT_cmp(group, proof.Y3, Y3, bn_ctx) == 0);
     }
-
+    
+    #ifdef DEBUG
     if (V1){
         cout<< "Y1 == proof.Y1" << endl;
     }else{
@@ -449,7 +503,11 @@ void SIGMA_DLOG_Verify(SIGMA_DLOG_PP &pp,
             ECP_print(Y3, "Y3");
         }
     }
-
+    #endif
+    EC_POINT_free(Y1);
+    EC_POINT_free(Y2);
+    EC_POINT_free(Y3);
+    return V1 && V2 && V3;
     /*bool Validity = (res == chl); 
 
     #ifdef DEBUG
@@ -465,13 +523,6 @@ void SIGMA_DLOG_Verify(SIGMA_DLOG_PP &pp,
         cout<< "H(*): " << res << endl;
     }
     #endif*/
-
-    BN_free(e); 
-
-    EC_POINT_free(Y1);
-    EC_POINT_free(Y2);
-    EC_POINT_free(Y3);
-
     //return Validity;
 }
 

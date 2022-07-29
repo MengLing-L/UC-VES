@@ -1,4 +1,9 @@
 //#define DEBUG
+/*#include <HsFFI.h>
+#include "/root/Three-Square/3squares-ffi_stub.h"
+#ifdef __GLASGOW_HASKELL__
+#include "/root/Three-Square/3squares-ffi_stub.h"
+#endif*/
 #include "../depends/modified_fischlin/modified_fischlin.hpp"
 #include "../depends/twisted_elgamal/twisted_elgamal.hpp"
 #include "../depends/signature/signature.hpp"
@@ -147,15 +152,17 @@ void test_protocol()
     Modified_Fischlin_Witness_free(witness);
     Modified_Fischlin_Proof_free(proof);
 
-    BN_free(m);}
+    BN_free(m);
+}
 
-int main()
+int main(int argc, char *argv[])
 {  
     // curve id = NID_secp256k1
+    //hs_init(&argc, &argv);
     global_initialize(NID_secp256k1);    
     // global_initialize(NID_secp256k1); 
     test_protocol();
     global_finalize();
-    
+    //hs_exit();
     return 0; 
 }

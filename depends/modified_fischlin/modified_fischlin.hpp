@@ -16,7 +16,7 @@ this hpp implements NIZKPoK for discrete logarithm equality
 using namespace std;
 const size_t b=9;
 const size_t t=12;  
-const size_t r=2; 
+const size_t r=10; 
 const size_t S=10;
 
 struct Modified_Fischlin_PP
@@ -37,10 +37,11 @@ struct Modified_Fischlin_Witness
 struct Modified_Fischlin_Proof
 {
     vector<OR_Proof> proof;
-    vector<string> chl1;
-    vector<string> chl0;
-    vector<string> chl;
-    vector<string> res;
+    vector<BIGNUM *> chl1;
+    vector<BIGNUM *> chl0;
+    vector<BIGNUM *> chl;
+    //vector<string> res;
+    vector<BIGNUM *> tmp_sum;
 };
 
 void Modified_Fischlin_PP_new(Modified_Fischlin_PP &pp){
@@ -93,13 +94,13 @@ void Modified_Fischlin_Proof_new(Modified_Fischlin_Proof &proof)
     proof.chl1.resize(r);
     proof.chl0.resize(r);
     proof.chl.resize(r);
-    proof.res.resize(r);
+    proof.tmp_sum.resize(r);
     for (int i=0; i < r; i++){
         OR_Proof_new(proof.proof[i]);
-        proof.chl1[i] = "";
-        proof.chl0[i] = "";
-        proof.chl[i] = "";
-        proof.res[i] = "";
+        proof.chl1[i] = BN_new();
+        proof.chl0[i] = BN_new();
+        proof.chl[i] = BN_new();
+        proof.tmp_sum[i] = BN_new();
     }
 }
 
@@ -143,45 +144,6 @@ void Modified_Fischlin_Setup(Modified_Fischlin_PP &pp, EC_POINT* &h){
     }
 }
 
-void multiThread(Modified_Fischlin_PP &pp, 
-                Modified_Fischlin_Instance &instance, 
-                Modified_Fischlin_Witness &witness,
-                //string &chl,
-                Modified_Fischlin_Proof &proof,
-                EC_POINT* &EK,
-                int i){
-    auto start_time = chrono::steady_clock::now();
-    cout << "i: " << i << endl;
-    BIGNUM *tmp_hash = BN_new();
-    BIGNUM *size = BN_new();
-    BN_set_word(size, uint64_t(pow(2, b)));
-    BIGNUM *BN_S = BN_new();
-    BN_set_word(BN_S, 2);
-    BIGNUM* tmp_chl1 = BN_new();
-    do{
-    //for (int j =0 ; j < pow(2, 12) ; j++){
-        BN_random(tmp_chl1);
-        proof.chl[i] = "";
-        proof.chl1[i] = "";
-        proof.chl0[i] = "";
-        OR_Prove(pp.pp[i], instance.instance[i], witness.witness[i], proof.chl[i], proof.chl1[i], proof.chl0[i], proof.proof[i], EK, tmp_chl1);
-        String_to_BN(proof.chl[i], tmp_hash);
-        BN_mod(tmp_hash, tmp_hash, size, bn_ctx);
-        /*if(BN_cmp (tmp_hash, BN_S) < 0){
-            break;
-        }*/
-    }while(BN_cmp (tmp_hash, BN_S) != -1);
-    BN_free(BN_S);
-    BN_free(tmp_hash);
-    BN_free(size);
-    BN_free(tmp_chl1);
-    auto end_time = chrono::steady_clock::now(); // end to count the time
-    auto running_time = end_time - start_time;
-    cout << "Thread " << i <<" takes time = "
-    << chrono::duration <double, milli> (running_time).count() << " ms" << endl;
-}
-
-
 void Modified_Fischlin_Prove(Modified_Fischlin_PP &pp, 
                             Modified_Fischlin_Instance &instance, 
                             Modified_Fischlin_Witness &witness,
@@ -192,24 +154,34 @@ void Modified_Fischlin_Prove(Modified_Fischlin_PP &pp,
     BIGNUM *size = BN_new();
     BN_set_word(size, uint64_t(pow(2, b)));
     BIGNUM *BN_S = BN_new();
-    BN_set_word(BN_S, 2);
-    BIGNUM* tmp_chl1 = BN_new();
+    BN_set_word(BN_S, 1);
+    /*auto start_time = chrono::steady_clock::now();
+    auto end_time = chrono::steady_clock::now(); // end to count the time
+    auto running_time = end_time - start_time;*/
+    //OR_Commit(pp.pp[0], instance.instance[0], witness.witness[0], proof.chl1[0], proof.proof[0], EK);
     for (int i=0; i < r; i++){
-        //cout << "i: " << i << endl;
+        BN_random(proof.chl1[i]);
+        //start_time = chrono::steady_clock::now();
+        OR_Commit(pp.pp[i], instance.instance[i], witness.witness[i], proof.chl1[i], proof.proof[i], EK);
+        //OR_Copy(pp.pp[i],instance.instance[i], proof.chl1[i], proof.proof[0], proof.proof[i]);
+        BN_set_word(proof.chl[i], 1);
+        
         do{
-            BN_random(tmp_chl1);
-            proof.chl[i] = "";
-            proof.chl1[i] = "";
-            proof.chl0[i] = "";
-            OR_Prove(pp.pp[i], instance.instance[i], witness.witness[i], proof.chl[i], proof.chl1[i], proof.chl0[i], proof.proof[i], EK, tmp_chl1);
-            String_to_BN(proof.chl[i], tmp_hash);
-            BN_mod(tmp_hash, tmp_hash, size, bn_ctx);
-        }while(BN_cmp (tmp_hash, BN_S) != -1);
+            BN_sub (proof.chl0[i], proof.chl1[i], proof.chl[i]);
+            OR_Res(pp.pp[i], instance.instance[i], witness.witness[i], proof.proof[i], EK, proof.chl0[i]);
+            Hash_BN_to_BN(proof.chl0[i], tmp_hash, size);
+            BN_add(proof.chl[i], proof.chl[i], BN_1);
+        }while(BN_cmp (tmp_hash, BN_S) > 0);
+        //end_time = chrono::steady_clock::now(); // end to count the time
+        //running_time = end_time - start_time;
+        //cout << "It takes time = "
+        //<< chrono::duration <double, milli> (running_time).count() << " ms" << endl;
+        BN_copy(proof.tmp_sum[i],tmp_hash);
     }
+    
     BN_free(BN_S);
     BN_free(tmp_hash);
     BN_free(size);
-    BN_free(tmp_chl1);
     /*thread threads[r];
 
     for (int i=0; i < r; i++){
@@ -232,8 +204,8 @@ void Modified_Fischlin_Verify(Modified_Fischlin_PP &pp,
     BN_set_word(size, uint64_t(pow(2, b)));
     bool Validity = true;
     for (int i=0; i < r; i++){
-        OR_Verify(pp.pp[i], instance.instance[i], proof.chl[i], proof.chl1[i], proof.chl0[i], proof.proof[i], proof.res[i], EK);
-        Validity = Validity && (proof.chl[i] == proof.res[i]); 
+        Validity =  Validity && OR_Verify(pp.pp[i], instance.instance[i], proof.chl[i], proof.chl1[i], proof.chl0[i], proof.proof[i], EK);
+        //Validity = Validity && (proof.chl[i] == proof.res[i]); 
     }
 
     #ifdef DEBUG
@@ -247,13 +219,15 @@ void Modified_Fischlin_Verify(Modified_Fischlin_PP &pp,
     BIGNUM *tmp_sum = BN_new();
     BN_set_word(BN_S, S);
     BN_copy(BN_0, tmp_sum);
+    BIGNUM *chl_bn = BN_new();
     for (int i=0; i < r; i++){
-        String_to_BN(proof.chl[i], tmp_hash);
-        BN_mod(tmp_hash, tmp_hash, size, bn_ctx);
-        BN_add(tmp_sum, tmp_sum, tmp_hash);
+        //Hash_BN_to_BN(proof.chl0[i], tmp_hash);
+        //BN_mod(tmp_hash, tmp_hash, size, bn_ctx);
+        BN_add(tmp_sum, tmp_sum, proof.tmp_sum[i]);
+        //BN_add(tmp_sum, tmp_sum, tmp_hash);
     }
 
-    if(BN_cmp (tmp_sum, BN_S) == -1 || BN_cmp (tmp_sum, BN_S) == 0){
+    if(BN_cmp (tmp_sum, BN_S) <= 0 && Validity){
         cout << "Modified Fischlin proof accepts." << endl;
     }else{
         cout << "Modified Fischlin proof rejects." << endl;

@@ -12,7 +12,7 @@ this hpp implements twisted ElGamal encrypt scheme
 #include "../common/hash.hpp"
 #include "../common/print.hpp"
 #include "../common/routines.hpp"
-
+#include <cstring>
 #include "calculate_dlog.hpp"
 
 const string hashmap_file  = "point2index.table"; // name of hashmap file

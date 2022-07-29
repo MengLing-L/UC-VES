@@ -169,15 +169,24 @@ void Original_Relation_Setup(Original_Relation_PP &pp, EC_POINT* &h){
 void Original_Relation_Commit(Original_Relation_PP &pp, 
                             Original_Relation_Instance &instance, 
                             Original_Relation_Witness &witness,
-                            string &chl,
+                            //string &chl,
                             Original_Relation_Proof &proof,
                             EC_POINT* &EK){
-    SIGMA_DLOG_Commit(pp.dlog_pp_sig, instance.dlog_instance, witness.dlog_witness, chl, proof.dlog_proof, EK);
-
+    SIGMA_DLOG_Commit(pp.dlog_pp_sig, instance.dlog_instance, witness.dlog_witness, proof.dlog_proof, EK);
+    
     for(int j=0; j < RANGE_SIZE; j++){
-        Range_Prove_Commit(pp.range_pp[j], instance.range_instance[j], witness.range_witness[j], chl, proof.range_proof[j]);
+        Range_Prove_Commit(pp.range_pp[j], instance.range_instance[j], witness.range_witness[j], proof.range_proof[j]);
     }
+}
 
+void Original_Relation_Copy(Original_Relation_PP &pp, 
+                            Original_Relation_Proof &org_proof,
+                            Original_Relation_Proof &tar_proof){
+    SIGMA_DLOG_Copy(pp.dlog_pp_sig, org_proof.dlog_proof, tar_proof.dlog_proof);
+    
+    for(int j=0; j < RANGE_SIZE; j++){
+        Range_Prove_Copy(pp.range_pp[j], org_proof.range_proof[j], tar_proof.range_proof[j]);
+    }
 }
 
 void Original_Relation_Res(Original_Relation_PP &pp, 
@@ -194,14 +203,32 @@ void Original_Relation_Res(Original_Relation_PP &pp,
     
 }
 
+void Original_Relation_Res(Original_Relation_PP &pp, 
+                            Original_Relation_Instance &instance, 
+                            Original_Relation_Witness &witness,
+                            BIGNUM *&chl, 
+                            Original_Relation_Proof &proof){
+    
+    SIGMA_DLOG_Res(pp.dlog_pp_sig, instance.dlog_instance, witness.dlog_witness, chl, proof.dlog_proof);
+
+    for(int j=0; j < RANGE_SIZE; j++){
+        Range_Prove_Res(pp.range_pp[j], instance.range_instance[j], witness.range_witness[j], chl, proof.range_proof[j]);
+    }
+    
+}
+
 
 bool Original_Relation_Verify(Original_Relation_PP &pp, 
                             Original_Relation_Instance &instance,  
-                            string &chl, 
+                            BIGNUM *&chl, 
                             Original_Relation_Proof &proof,
                             EC_POINT* &EK){
-
-    SIGMA_DLOG_Verify(pp.dlog_pp_sig, instance.dlog_instance, chl, proof.dlog_proof, EK);
+    bool validity = true;
+    validity = validity && SIGMA_DLOG_Verify(pp.dlog_pp_sig, instance.dlog_instance, chl, proof.dlog_proof, EK);
+    for(int j=0; j < RANGE_SIZE; j++){
+        validity = validity && Range_Verify(pp.range_pp[j], instance.range_instance[j], chl, proof.range_proof[j]);
+    }
+    return validity;
 }
 
 bool Original_Relation_Verify(Original_Relation_PP &pp, 

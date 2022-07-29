@@ -65,6 +65,21 @@ void Hash_BN_to_BN(BIGNUM *&str, BIGNUM *&y)
     BN_nnmod(y, y, order, bn_ctx);
 }
 
+void Hash_BN_to_BN(BIGNUM *&str, BIGNUM *&y, BIGNUM *&size)
+{ 
+    unsigned char buffer[BN_LEN];
+    unsigned char hash_output[HASH_OUTPUT_LEN]; 
+ 
+    SHA256_CTX sha256_ctx;
+    SHA256_Init(&sha256_ctx);
+
+    BN_bn2bin(str, buffer); 
+    SHA256(buffer, BN_LEN, hash_output);
+
+    BN_bin2bn(hash_output, HASH_OUTPUT_LEN, y);
+    BN_nnmod(y, y, size, bn_ctx);
+}
+
 /* map an EC point to another EC point, used in pp generation */
 void Hash_ECP_to_ECP(EC_POINT *&g, EC_POINT *&h)
 {

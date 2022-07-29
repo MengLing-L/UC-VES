@@ -16,7 +16,7 @@ this hpp implements NIZKPoK for discrete logarithm equality
 #include "../twisted_elgamal/twisted_elgamal.hpp"
 #include "../rangeproofs/range_proofs.hpp"
 
-const size_t SIGMA_DLOG_SIZE = 3;
+const size_t SIGMA_DLOG_SIZE = 2;
 const size_t RANGE_SIZE = 8;
 
 struct Witness_Encryption_AndR_PP
@@ -203,8 +203,8 @@ void Witness_Encryption_AndR_Commit(Witness_Encryption_AndR_PP &pp,
                             EC_POINT* &EK1){
     
     SIGMA_DLOG_Commit(pp.dlog_pp_unsig, instance.dlog_instance[0], witness.dlog_witness[0], proof.dlog_proof[0], EK);
-    SIGMA_DLOG_Commit(pp.dlog_pp_unsig, instance.dlog_instance[1], witness.dlog_witness[1], proof.dlog_proof[1], EK);
-    SIGMA_DLOG_Commit(pp.dlog_pp_sig, instance.dlog_instance[2], witness.dlog_witness[2], proof.dlog_proof[2], EK1);
+    SIGMA_DLOG_Commit(pp.dlog_pp_sig, instance.dlog_instance[1], witness.dlog_witness[1], proof.dlog_proof[1], EK1);
+    //SIGMA_DLOG_Commit(pp.dlog_pp_sig, instance.dlog_instance[2], witness.dlog_witness[2], proof.dlog_proof[2], EK1);
 
     for (int i=0; i < SIGMA_DLOG_SIZE; i++){
         for(int j=0; j < RANGE_SIZE; j++){
@@ -221,8 +221,8 @@ void Witness_Encryption_AndR_Res(Witness_Encryption_AndR_PP &pp,
                             Witness_Encryption_AndR_Proof &proof){
 
     SIGMA_DLOG_Res(pp.dlog_pp_unsig, instance.dlog_instance[0], witness.dlog_witness[0], chl, proof.dlog_proof[0]);
-    SIGMA_DLOG_Res(pp.dlog_pp_unsig, instance.dlog_instance[1], witness.dlog_witness[1], chl, proof.dlog_proof[1]);
-    SIGMA_DLOG_Res(pp.dlog_pp_sig, instance.dlog_instance[2], witness.dlog_witness[2], chl, proof.dlog_proof[2]);
+    SIGMA_DLOG_Res(pp.dlog_pp_sig, instance.dlog_instance[1], witness.dlog_witness[1], chl, proof.dlog_proof[1]);
+    //SIGMA_DLOG_Res(pp.dlog_pp_sig, instance.dlog_instance[2], witness.dlog_witness[2], chl, proof.dlog_proof[2]);
 
     for (int i=0; i < SIGMA_DLOG_SIZE; i++){
         for(int j=0; j < RANGE_SIZE; j++){
@@ -254,8 +254,8 @@ bool Witness_Encryption_AndR_Verify(Witness_Encryption_AndR_PP &pp,
 
     bool validity = true;
     validity = validity && SIGMA_DLOG_Verify(pp.dlog_pp_unsig, instance.dlog_instance[0], chl, proof.dlog_proof[0], EK);
-    validity = validity && SIGMA_DLOG_Verify(pp.dlog_pp_unsig, instance.dlog_instance[1], chl, proof.dlog_proof[1], EK);
-    validity = validity && SIGMA_DLOG_Verify(pp.dlog_pp_sig, instance.dlog_instance[2], chl, proof.dlog_proof[2], EK1);
+    validity = validity && SIGMA_DLOG_Verify(pp.dlog_pp_sig, instance.dlog_instance[1], chl, proof.dlog_proof[1], EK1);
+    //validity = validity && SIGMA_DLOG_Verify(pp.dlog_pp_sig, instance.dlog_instance[2], chl, proof.dlog_proof[2], EK1);
     for (int i=0; i < SIGMA_DLOG_SIZE; i++){
         for(int j=0; j < RANGE_SIZE; j++){
             validity = validity && Range_Verify(pp.range_pp, instance.range_instance[i][j], chl, proof.range_proof[i][j]);

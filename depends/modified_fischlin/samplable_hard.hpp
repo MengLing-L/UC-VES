@@ -250,13 +250,43 @@ void SAMPLABLE_HARD_Simulate_Proof(SAMPLABLE_HARD_PP &pp,
     BN_free(e);
 }
 
+void SAMPLABLE_HARD_Simulate_Proof(SAMPLABLE_HARD_PP &pp, 
+                              SAMPLABLE_HARD_Instance &instance,  
+                              //string &chl, 
+                              BIGNUM *&e,
+                              SAMPLABLE_HARD_Proof &proof)
+{
+
+    //BIGNUM *e = BN_new(); 
+    //String_to_BN(chl1, e);
+    
+    BN_random (proof.z);
+
+    const EC_POINT *vec_A[2]; 
+    const BIGNUM *vec_x[2]; 
+    
+    
+    vec_A[0] = instance.Q; 
+    vec_A[1] = pp.g;
+    vec_x[0] = e; 
+    vec_x[1] = proof.z;
+    EC_POINTs_mul(group, proof.Y, NULL, 2, vec_A, vec_x, bn_ctx);  
+
+    //chl += ECP_ep2string(proof.Y); 
+
+    #ifdef DEBUG
+    SAMPLABLE_HARD_Proof_print(proof); 
+    #endif
+    //BN_free(e);
+}
+
 /*
     Check if PI is a valid NIZK proof for statenent (G1^w = H1 and G2^w = H2)
 */
 
-void SAMPLABLE_HARD_Verify(SAMPLABLE_HARD_PP &pp, 
+bool SAMPLABLE_HARD_Verify(SAMPLABLE_HARD_PP &pp, 
                                SAMPLABLE_HARD_Instance &instance,
-                               string &chl, 
+                               BIGNUM *&e, 
                                SAMPLABLE_HARD_Proof &proof,
                                EC_POINT* &EK)
 {
@@ -266,8 +296,8 @@ void SAMPLABLE_HARD_Verify(SAMPLABLE_HARD_PP &pp,
 
     
     // compute the challenge
-    BIGNUM *e = BN_new(); 
-    String_to_BN(chl, e); // V's challenge in Zq; 
+    //BIGNUM *e = BN_new(); 
+    //String_to_BN(chl, e); // V's challenge in Zq; 
 
      
     const EC_POINT *vec_A[2]; 
@@ -284,7 +314,7 @@ void SAMPLABLE_HARD_Verify(SAMPLABLE_HARD_PP &pp,
     bool V1;
 
     V1 = (EC_POINT_cmp(group, proof.Y, Y, bn_ctx) == 0); 
-
+    #ifdef DEBUG
     if (V1){
         cout<< "Y == proof.Y" << endl;
     }else{
@@ -292,7 +322,8 @@ void SAMPLABLE_HARD_Verify(SAMPLABLE_HARD_PP &pp,
         ECP_print(proof.Y, "proof.Y");
         ECP_print(Y, "Y");
     }
-
+    #endif
+    return V1;
     /*bool Validity = (res == chl); 
 
     #ifdef DEBUG

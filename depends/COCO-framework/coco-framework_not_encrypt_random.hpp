@@ -12,7 +12,7 @@ this hpp implements NIZKPoK for discrete logarithm equality
 #include "../common/hash.hpp"
 #include "../common/print.hpp"
 #include "../common/routines.hpp"
-#include "../COCO-framework/or_protocol.hpp"
+#include "../COCO-framework/or_protocol_not_encrypt_random.hpp"
 #include "../twisted_elgamal/twisted_elgamal.hpp"
 
 struct COCO_Framework_PP
@@ -114,7 +114,8 @@ void COCO_Framework_Prove(COCO_Framework_PP &pp,
 
     vector<BIGNUM *> split_each_4bytes_m(BN_LEN/4);
     BN_vec_new(split_each_4bytes_m);
-    get_32bit_4bytes_BigNumVec(split_each_4bytes_m, witness.witness.enc_witness_witness.dlog_witness[2].w, pp_tt);
+    //get_32bit_4bytes_BigNumVec(split_each_4bytes_m, witness.witness.enc_witness_witness.dlog_witness[2].w, pp_tt);
+    get_32bit_4bytes_BigNumVec(split_each_4bytes_m, witness.witness.enc_witness_witness.dlog_witness[1].w, pp_tt);
 
     vector<BIGNUM *> each_4bytes_m_beta(BN_LEN/4);
     BN_vec_new(each_4bytes_m_beta);
@@ -146,49 +147,14 @@ void COCO_Framework_Prove(COCO_Framework_PP &pp,
         EC_POINT_copy(instance.instance.enc_witness_instance.range_instance[0][j].C, each_4bytes_m_res_U_V[j].Y);
     }
 
-    BN_copy(witness.witness.enc_witness_witness.dlog_witness[0].w, witness.witness.enc_witness_witness.dlog_witness[2].w);
+    //BN_copy(witness.witness.enc_witness_witness.dlog_witness[0].w, witness.witness.enc_witness_witness.dlog_witness[2].w);
+    BN_copy(witness.witness.enc_witness_witness.dlog_witness[0].w, witness.witness.enc_witness_witness.dlog_witness[1].w);
 
     getU(instance.instance.enc_witness_instance.dlog_instance[0].U, each_4bytes_m_res_U_V, pp_tt); 
 
     getV(instance.instance.enc_witness_instance.dlog_instance[0].V, each_4bytes_m_res_U_V, pp_tt); 
 
-    //encrypt the second witness
-    //vector<BIGNUM *> split_each_4bytes_m1(BN_LEN/4);
-    BN_vec_new(split_each_4bytes_m);
-    get_32bit_4bytes_BigNumVec(split_each_4bytes_m, witness.witness.enc_witness_witness.dlog_witness[2].gamma, pp_tt);
 
-    //vector<BIGNUM *> each_4bytes_m_beta1(BN_LEN/4);
-    BN_vec_new(each_4bytes_m_beta);
-    
-    //vector<Twisted_ElGamal_CT> each_4bytes_m_res_U_V1(BN_LEN/4);
-    for(auto i = 0; i < each_4bytes_m_res_U_V.size(); i++){
-        Twisted_ElGamal_CT_new(each_4bytes_m_res_U_V[i]); 
-    }
-
-    for(int i=0; i<split_each_4bytes_m.size(); i++){
-        BN_random(each_4bytes_m_beta[i]);
-        BN_mod(split_each_4bytes_m[i], split_each_4bytes_m[i], pp_tt.BN_MSG_SIZE, bn_ctx);
-        Twisted_ElGamal_Enc(pp_tt, EK, split_each_4bytes_m[i], each_4bytes_m_beta[i], each_4bytes_m_res_U_V[i]);     
-    }
-
-    for(int j=0; j < each_4bytes_m_beta.size(); j++){
-        BN_set_word(tmp, pp_tt.MSG_LEN*(each_4bytes_m_beta.size()-j-1));
-        BN_mod_exp(tmp, BN_2, tmp, order, bn_ctx);
-        BN_mod_mul(tmp, each_4bytes_m_beta[j], tmp, order, bn_ctx);
-        BN_mod_add(witness.witness.enc_witness_witness.dlog_witness[1].gamma, witness.witness.enc_witness_witness.dlog_witness[1].gamma, tmp, order, bn_ctx);
-    }
-
-    for(int j=0; j < split_each_4bytes_m.size(); j++){
-        BN_copy(witness.witness.enc_witness_witness.range_witness[1][j].w, split_each_4bytes_m[j]);
-        BN_copy(witness.witness.enc_witness_witness.range_witness[1][j].r, each_4bytes_m_beta[j]);
-        EC_POINT_copy(instance.instance.enc_witness_instance.range_instance[1][j].C, each_4bytes_m_res_U_V[j].Y);
-    }
-
-    BN_copy(witness.witness.enc_witness_witness.dlog_witness[1].w, witness.witness.enc_witness_witness.dlog_witness[2].gamma);
-
-    getU(instance.instance.enc_witness_instance.dlog_instance[1].U, each_4bytes_m_res_U_V, pp_tt); 
-
-    getV(instance.instance.enc_witness_instance.dlog_instance[1].V, each_4bytes_m_res_U_V, pp_tt); 
 
     //simulation of the proof for the invalid signature.
     BIGNUM *m = BN_new();

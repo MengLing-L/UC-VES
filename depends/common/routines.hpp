@@ -252,7 +252,7 @@ string exec(const char* cmd) {
     return result;
 }
 
-std::vector<std::string> stringSplit(const std::string& strIn, char delim) {
+/*std::vector<std::string> stringSplit(const std::string& strIn, char delim) {
     char* str = const_cast<char*>(strIn.c_str());
     std::string s;
     s.append(1, delim);
@@ -263,7 +263,7 @@ std::vector<std::string> stringSplit(const std::string& strIn, char delim) {
         splitted = strtok(NULL, s.c_str());
     }
     return elems;
-}
+}*/
 
 #endif
 

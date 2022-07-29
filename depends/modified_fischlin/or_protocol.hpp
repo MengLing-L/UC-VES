@@ -121,7 +121,7 @@ void OR_Setup(OR_PP &pp, EC_POINT* &h){
 }
 
 
-void OR_Prove(OR_PP &pp, 
+/*void OR_Prove(OR_PP &pp, 
                             OR_Instance &instance,
                             OR_Witness &witness,
                             string &chl,
@@ -153,6 +153,52 @@ void OR_Prove(OR_PP &pp,
     BN_free(e);
     //BN_free(tmp_chl1);
     BN_free(tmp_chl0);
+}*/
+
+void OR_Commit(OR_PP &pp, 
+                            OR_Instance &instance,
+                            OR_Witness &witness,
+                            //string &chl,
+                            BIGNUM *&chl1,
+                            OR_Proof &proof,
+                            EC_POINT* &EK){
+    
+    
+    //BIGNUM* tmp_chl1 = BN_new();
+
+    //chl1 = BN_bn2string(tmp_chl1);
+
+    SAMPLABLE_HARD_Simulate_Proof(pp.samplable_hard_pp, instance.samplable_hard_instance, chl1, proof.samplable_hard_proof);
+
+    Original_Relation_Commit(pp.original_relation_pp, instance.original_relation_instance, witness.original_relation_witness, proof.original_relation_proof, EK);
+
+}
+
+void OR_Copy(OR_PP &pp, 
+                            OR_Instance &instance,
+                            //string &chl,
+                            BIGNUM *&chl1,
+                            OR_Proof &org_proof,
+                            OR_Proof &tar_proof){
+    
+    
+    //BIGNUM* tmp_chl1 = BN_new();
+
+    //chl1 = BN_bn2string(tmp_chl1);
+
+    SAMPLABLE_HARD_Simulate_Proof(pp.samplable_hard_pp, instance.samplable_hard_instance, chl1, tar_proof.samplable_hard_proof);
+
+    Original_Relation_Copy(pp.original_relation_pp,  org_proof.original_relation_proof, tar_proof.original_relation_proof);
+
+}
+
+void OR_Res(OR_PP &pp, 
+                            OR_Instance &instance,
+                            OR_Witness &witness,
+                            OR_Proof &proof,
+                            EC_POINT* &EK,
+                            BIGNUM* &chl0){
+    Original_Relation_Res(pp.original_relation_pp, instance.original_relation_instance, witness.original_relation_witness, chl0, proof.original_relation_proof);
 }
 
 
@@ -167,6 +213,39 @@ bool OR_Verify(OR_PP &pp,
     SAMPLABLE_HARD_Verify(pp.samplable_hard_pp, instance.samplable_hard_instance, chl1, proof.samplable_hard_proof, res);
 
     Original_Relation_Verify(pp.original_relation_pp, instance.original_relation_instance, chl0, proof.original_relation_proof, res, EK);
+    
+
+
+    /*BIGNUM *e = BN_new();
+    BIGNUM *tmp = BN_new();
+    BIGNUM* tmp_chl1 = BN_new();
+    BIGNUM* tmp_chl0 = BN_new();
+    Hash_String_to_BN(chl, e);
+    Hash_String_to_BN(chl1, tmp_chl1);
+    Hash_String_to_BN(chl0, tmp_chl0);
+
+    BN_add(tmp, tmp_chl1, tmp_chl0);
+
+
+    if (BN_cmp (tmp, e) == 0){
+        cout << "chl = chl1 + chl0" << endl;
+    }
+
+    BN_free(e);
+    BN_free(tmp_chl1);
+    BN_free(tmp_chl0);
+    BN_free(tmp);*/
+}
+
+bool OR_Verify(OR_PP &pp, 
+                            OR_Instance &instance, 
+                            BIGNUM *&chl, 
+                            BIGNUM *&chl1,
+                            BIGNUM *&chl0,
+                            OR_Proof &proof,
+                            EC_POINT* &EK){
+    return SAMPLABLE_HARD_Verify(pp.samplable_hard_pp, instance.samplable_hard_instance, chl1, proof.samplable_hard_proof, EK) 
+                && Original_Relation_Verify(pp.original_relation_pp, instance.original_relation_instance, chl0, proof.original_relation_proof, EK);
     
 
 

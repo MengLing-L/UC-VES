@@ -1,6 +1,7 @@
 //#define DEBUG
 
-#include "../depends/COCO-framework/coco-framework.hpp"
+//#include "../depends/COCO-framework/coco-framework.hpp"
+#include "../depends/COCO-framework/coco-framework_not_encrypt_random.hpp"
 #include "../depends/twisted_elgamal/twisted_elgamal.hpp"
 #include "../depends/signature/signature.hpp"
 #include <string.h>
@@ -86,6 +87,7 @@ void test_protocol()
     }
 
     BIGNUM *tmp = BN_new();
+    /*
     for(int j=0; j<each_4bytes_m_beta.size(); j++){
         BN_set_word(tmp, enc_pp.MSG_LEN*(each_4bytes_m_beta.size()-j-1));
         BN_mod_exp(tmp, BN_2, tmp, order, bn_ctx);
@@ -107,9 +109,32 @@ void test_protocol()
     
     EC_POINT_copy(instance.instance.enc_witness_instance.dlog_instance[2].B, signature_result.R);
 
-    EC_POINT_copy(instance.instance.enc_witness_instance.dlog_instance[2].A, signature_result.A);
+    EC_POINT_copy(instance.instance.enc_witness_instance.dlog_instance[2].A, signature_result.A);*/
+    for(int j=0; j<each_4bytes_m_beta.size(); j++){
+        BN_set_word(tmp, enc_pp.MSG_LEN*(each_4bytes_m_beta.size()-j-1));
+        BN_mod_exp(tmp, BN_2, tmp, order, bn_ctx);
+        BN_mod_mul(tmp, each_4bytes_m_beta[j], tmp, order, bn_ctx);
+        BN_mod_add(witness.witness.enc_witness_witness.dlog_witness[1].gamma, witness.witness.enc_witness_witness.dlog_witness[1].gamma, tmp, order, bn_ctx);
+    }
 
-    string chl = "";
+    for(int j=0; j < split_each_4bytes_m.size(); j++){
+        BN_copy(witness.witness.enc_witness_witness.range_witness[1][j].w, split_each_4bytes_m[j]);
+        BN_copy(witness.witness.enc_witness_witness.range_witness[1][j].r, each_4bytes_m_beta[j]);
+        EC_POINT_copy(instance.instance.enc_witness_instance.range_instance[1][j].C, each_4bytes_m_res_U_V[j].Y);
+    }
+    
+    BN_copy(witness.witness.enc_witness_witness.dlog_witness[1].w, signature_result.s);
+
+    getU(instance.instance.enc_witness_instance.dlog_instance[1].U, each_4bytes_m_res_U_V, enc_pp); 
+
+    getV(instance.instance.enc_witness_instance.dlog_instance[1].V, each_4bytes_m_res_U_V, enc_pp); 
+    
+    EC_POINT_copy(instance.instance.enc_witness_instance.dlog_instance[1].B, signature_result.R);
+
+    EC_POINT_copy(instance.instance.enc_witness_instance.dlog_instance[1].A, signature_result.A);
+
+    BIGNUM *chl = BN_new();
+    BN_random(chl);
     auto start_time = chrono::steady_clock::now();
     COCO_Framework_Prove(pp, instance, witness, chl, proof, pp_enc_wit_keypair.pk, keypair.pk, pp_enc_wit);
     auto end_time = chrono::steady_clock::now(); // end to count the time
@@ -117,15 +142,14 @@ void test_protocol()
     cout << "COCO framework proving phase takes time = "
     << chrono::duration <double, milli> (running_time).count() << " ms" << endl;
 
-    string res = "";
     start_time = chrono::steady_clock::now();
-    COCO_Framework_Verify(pp, instance, chl, proof, res, pp_enc_wit_keypair.pk, keypair.pk);
+    bool Validity = COCO_Framework_Verify(pp, instance, chl, proof, pp_enc_wit_keypair.pk, keypair.pk);
     end_time = chrono::steady_clock::now(); // end to count the time
     running_time = end_time - start_time;
     cout << "COCO framework verifing phase takes time = "
     << chrono::duration <double, milli> (running_time).count() << " ms" << endl;
 
-    bool Validity = (res == chl); 
+    //bool Validity = (res == chl); 
 
     
     if (Validity){ 
@@ -137,8 +161,6 @@ void test_protocol()
     }
     else{
         cout<< "COCO framework proof rejects." << endl; 
-        cout<< "chl: " << chl << endl;
-        cout<< "H(*): " << res << endl;
     }
     
     Twisted_ElGamal_PP_free(enc_pp); 
