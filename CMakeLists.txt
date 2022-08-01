@@ -9,49 +9,13 @@ find_package(OpenSSL REQUIRED)
 
 include_directories(${OPENSSL_INCLUDE_DIR})
 
-  
-#add_executable(test_range_proof test/test_range_proof.cpp)
+add_executable(uc_nizk_comparison main/uc_nizk_comparison.cpp)
 
-#target_link_libraries(test_range_proof ${OPENSSL_LIBRARIES})
+target_link_libraries(uc_nizk_comparison ${OPENSSL_LIBRARIES})
+target_link_libraries(uc_nizk_comparison -lgmp)
 
-#add_executable(test_dlog test/test_dlog.cpp)
 
-#target_link_libraries(test_dlog ${OPENSSL_LIBRARIES})
+add_executable(escrow_protocol_comparison main/escrow_protocol_comparison.cpp)
 
-#add_executable(test_encrypt_witness test/test_encrypt_witness.cpp)
-
-#target_link_libraries(test_encrypt_witness ${OPENSSL_LIBRARIES})
-
-#add_executable(test_simulate_encrypt_signature test/test_simulate_encrypt_signature.cpp)
-
-#target_link_libraries(test_simulate_encrypt_signature ${OPENSSL_LIBRARIES})
-
-#add_executable(test_sigma_dlog test/test_sigma_dlog.cpp)
-
-#target_link_libraries(test_sigma_dlog ${OPENSSL_LIBRARIES})
-
-#add_executable(test_encrypt_witness_or_encrypt_signature test/test_encrypt_witness_or_encrypt_signature.cpp)
-
-#target_link_libraries(test_encrypt_witness_or_encrypt_signature ${OPENSSL_LIBRARIES})
-
-add_executable(test_cocoframework test/test_cocoframework.cpp)
-
-target_link_libraries(test_cocoframework ${OPENSSL_LIBRARIES})
-target_link_libraries(test_cocoframework -lgmp)
-
-#add_executable(test_modifyfis_sigma_dlog test/test_modifyfis_sigma_dlog.cpp)
-
-#target_link_libraries(test_modifyfis_sigma_dlog ${OPENSSL_LIBRARIES})
-
-#add_executable(test_modified_relation test/test_modified_relation.cpp)
-
-#target_link_libraries(test_modified_relation ${OPENSSL_LIBRARIES})
-
-#add_executable(test_fischlin_or test/test_fischlin_or.cpp)
-
-#target_link_libraries(test_fischlin_or ${OPENSSL_LIBRARIES})
-
-add_executable(test_fischlin test/test_fischlin.cpp)
-
-target_link_libraries(test_fischlin ${OPENSSL_LIBRARIES})
-target_link_libraries(test_fischlin -lgmp)
+target_link_libraries(escrow_protocol_comparison ${OPENSSL_LIBRARIES})
+target_link_libraries(escrow_protocol_comparison -lgmp)

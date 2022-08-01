@@ -1336,8 +1336,8 @@ bool Range_Verify(Range_PP &pp,
                             BIGNUM *&e,
                             Range_Proof &proof){
 
-    const EC_POINT *vec_A[3]; 
-    const BIGNUM *vec_x[3];
+    const EC_POINT *vec_A[8]; 
+    const BIGNUM *vec_x[8];
 
     vector<EC_POINT *> c_invchl(VECTOR_LEN);
     ECP_vec_new(c_invchl);
@@ -1371,7 +1371,6 @@ bool Range_Verify(Range_PP &pp,
         vec_x[1] = proof.t[i];
         vec_x[2] = BN_1;
         EC_POINTs_mul(group, f[i], NULL, 3, vec_A, vec_x, bn_ctx);
-
     }
     
 
@@ -1381,7 +1380,7 @@ bool Range_Verify(Range_PP &pp,
     }
 
 
-    vec_A[0] = c_zinv[1]; 
+   /* vec_A[0] = c_zinv[1]; 
     vec_A[1] = c_zinv[2];
     vec_A[2] = c_zinv[3];
     vec_x[0] = BN_1; 
@@ -1403,7 +1402,21 @@ bool Range_Verify(Range_PP &pp,
     vec_A[1] = Cinvz_sum;
     vec_x[0] = BN_1; 
     vec_x[1] = BN_1;
-    EC_POINTs_mul(group, F, NULL, 2, vec_A, vec_x, bn_ctx);
+    EC_POINTs_mul(group, F, NULL, 2, vec_A, vec_x, bn_ctx);*/
+    BN_mul (FOUR_z_0, FOUR, proof.z[0], bn_ctx);
+    vec_A[0] = c_zinv[1]; 
+    vec_A[1] = c_zinv[2];
+    vec_A[2] = c_zinv[3];
+    vec_A[3] = pp.h; 
+    vec_A[4] = pp.g;
+    vec_A[5] = instance.C;
+    vec_x[0] = BN_1; 
+    vec_x[1] = BN_1;
+    vec_x[2] = BN_1;
+    vec_x[3] = proof.tau; 
+    vec_x[4] = e;
+    vec_x[5] = FOUR_z_0;
+    EC_POINTs_mul(group, F, NULL, 6, vec_A, vec_x, bn_ctx);
 
     //string res = "";
     bool validity = true;

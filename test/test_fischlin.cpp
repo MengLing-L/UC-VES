@@ -36,16 +36,16 @@ void test_protocol()
     Twisted_ElGamal_KP_new(keypair); 
     Twisted_ElGamal_KeyGen(enc_pp, keypair);
 
-    Modified_Fischlin_PP pp;
-    Modified_Fischlin_PP_new(pp);
-    Modified_Fischlin_Setup(pp, enc_pp.h);
-    Modified_Fischlin_Instance instance;
-    Modified_Fischlin_Instance_new(instance);
-    Modified_Fischlin_Witness witness;
-    Modified_Fischlin_Witness_new(witness);
+    Modified_Fischlin_PP pp_mf;
+    Modified_Fischlin_PP_new(pp_mf);
+    Modified_Fischlin_Setup(pp_mf, enc_pp.h);
+    Modified_Fischlin_Instance instance_mf;
+    Modified_Fischlin_Instance_new(instance_mf);
+    Modified_Fischlin_Witness witness_mf;
+    Modified_Fischlin_Witness_new(witness_mf);
     
-    Modified_Fischlin_Proof proof;
-    Modified_Fischlin_Proof_new(proof);
+    Modified_Fischlin_Proof proof_mf;
+    Modified_Fischlin_Proof_new(proof_mf);
 
     BIGNUM *m_prime = BN_new();
     BIGNUM *m = BN_new();
@@ -83,74 +83,62 @@ void test_protocol()
         BN_set_word(tmp, enc_pp.MSG_LEN*(each_4bytes_m_beta.size()-j-1));
         BN_mod_exp(tmp, BN_2, tmp, order, bn_ctx);
         BN_mod_mul(tmp, each_4bytes_m_beta[j], tmp, order, bn_ctx); 
-        BN_mod_add(witness.witness[0].original_relation_witness.dlog_witness.gamma, witness.witness[0].original_relation_witness.dlog_witness.gamma, tmp, order, bn_ctx); 
+        BN_mod_add(witness_mf.witness[0].original_relation_witness.dlog_witness.gamma, witness_mf.witness[0].original_relation_witness.dlog_witness.gamma, tmp, order, bn_ctx); 
     }
     for (size_t k = 1; k < r; k++)
     {
-        BN_copy(witness.witness[k].original_relation_witness.dlog_witness.gamma, witness.witness[0].original_relation_witness.dlog_witness.gamma);
+        BN_copy(witness_mf.witness[k].original_relation_witness.dlog_witness.gamma, witness_mf.witness[0].original_relation_witness.dlog_witness.gamma);
     }
 
     for(int j=0; j < split_each_4bytes_m.size(); j++){
         for (size_t k = 0; k < r; k++)
         {
-            BN_copy(witness.witness[k].original_relation_witness.range_witness[j].w, split_each_4bytes_m[j]);
-            BN_copy(witness.witness[k].original_relation_witness.range_witness[j].r, each_4bytes_m_beta[j]);
-            EC_POINT_copy(instance.instance[k].original_relation_instance.range_instance[j].C, each_4bytes_m_res_U_V[j].Y);
+            BN_copy(witness_mf.witness[k].original_relation_witness.range_witness[j].w, split_each_4bytes_m[j]);
+            BN_copy(witness_mf.witness[k].original_relation_witness.range_witness[j].r, each_4bytes_m_beta[j]);
+            EC_POINT_copy(instance_mf.instance[k].original_relation_instance.range_instance[j].C, each_4bytes_m_res_U_V[j].Y);
         } 
     }
     
     for (size_t k = 0; k < r; k++){
-        BN_copy(witness.witness[k].original_relation_witness.dlog_witness.w, signature_result.s);
+        BN_copy(witness_mf.witness[k].original_relation_witness.dlog_witness.w, signature_result.s);
     }
 
     for (size_t k = 0; k < r; k++){
-        getU(instance.instance[k].original_relation_instance.dlog_instance.U, each_4bytes_m_res_U_V, enc_pp); 
+        getU(instance_mf.instance[k].original_relation_instance.dlog_instance.U, each_4bytes_m_res_U_V, enc_pp); 
     }
 
     for (size_t k = 0; k < r; k++){
-        getV(instance.instance[k].original_relation_instance.dlog_instance.V, each_4bytes_m_res_U_V, enc_pp); 
+        getV(instance_mf.instance[k].original_relation_instance.dlog_instance.V, each_4bytes_m_res_U_V, enc_pp); 
     }
 
     for (size_t k = 0; k < r; k++){
-        EC_POINT_copy(instance.instance[k].original_relation_instance.dlog_instance.B, signature_result.R);
+        EC_POINT_copy(instance_mf.instance[k].original_relation_instance.dlog_instance.B, signature_result.R);
     }
 
     for (size_t k = 0; k < r; k++){
-        EC_POINT_copy(instance.instance[k].original_relation_instance.dlog_instance.A, signature_result.A);
+        EC_POINT_copy(instance_mf.instance[k].original_relation_instance.dlog_instance.A, signature_result.A);
     }
     
     BN_random(m);
 
     for (size_t k = 0; k < r; k++){
-        EC_POINT_mul(group, instance.instance[k].samplable_hard_instance.Q, NULL, generator, m, bn_ctx);
+        EC_POINT_mul(group, instance_mf.instance[k].samplable_hard_instance.Q, NULL, generator, m, bn_ctx);
     }
     //BN_random(witness.w);
     //BN_set_word(witness.w, 200);
     //BN_set_word(witness.r, 200);
 
 
-    auto start_time = chrono::steady_clock::now();
-    Modified_Fischlin_Prove(pp, instance, witness, proof, keypair.pk);
-    auto end_time = chrono::steady_clock::now(); // end to count the time
-    auto running_time = end_time - start_time;
-    cout << "Modified Fischlin proving phase takes time = "
-    << chrono::duration <double, milli> (running_time).count() << " ms" << endl;
-
-    start_time = chrono::steady_clock::now();
-    Modified_Fischlin_Verify(pp, instance, proof, keypair.pk);
-    end_time = chrono::steady_clock::now(); // end to count the time
-    running_time = end_time - start_time;
-    cout << "Modified Fischlin verifying phase takes time = "
-    << chrono::duration <double, milli> (running_time).count() << " ms" << endl;
+    
 
     
     Twisted_ElGamal_PP_free(enc_pp); 
     Twisted_ElGamal_KP_free(keypair); 
 
-    Modified_Fischlin_PP_free(pp);
-    Modified_Fischlin_Instance_free(instance);
-    Modified_Fischlin_Witness_free(witness);
-    Modified_Fischlin_Proof_free(proof);
+    Modified_Fischlin_PP_free(pp_mf);
+    Modified_Fischlin_Instance_free(instance_mf);
+    Modified_Fischlin_Witness_free(witness_mf);
+    Modified_Fischlin_Proof_free(proof_mf);
 
     BN_free(m);
 }

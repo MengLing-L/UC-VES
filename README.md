@@ -38,12 +38,12 @@ The current implementation is based on OpenSSL library. See the installment inst
 To compile and test the system, do the following: 
 
 ```
-  $ cd {PATH}/ZKP_PHE_1bit
+  $ cd {PATH}/UC-VES
   $ mkdir build && cd build
   $ cmake ..
   $ make
-  $ ./test_zkp_phe_1bit
+  $ ./escrow_protocol_comparison
+  $ ./uc_nizk_comparison
 ```
-
 
 

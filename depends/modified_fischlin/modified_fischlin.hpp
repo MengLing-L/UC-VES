@@ -210,7 +210,7 @@ void Modified_Fischlin_Verify(Modified_Fischlin_PP &pp,
 
     #ifdef DEBUG
         if(!Validity){
-            cout << "Modified Fischlin r proofs rejects."
+            cout << "Modified Fischlin r proofs rejects." << endl;
         } 
     #endif
 

@@ -16,7 +16,6 @@ this hpp implements NIZKPoK for discrete logarithm equality
 #include "../twisted_elgamal/twisted_elgamal.hpp"
 #include "../rangeproofs/range_proofs.hpp"
 
-const size_t RANGE_SIZE = 8;
 
 struct Original_Relation_PP
 {

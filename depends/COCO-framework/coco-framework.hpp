@@ -155,7 +155,7 @@ void COCO_Framework_Prove(COCO_Framework_PP &pp,
     //encrypt the second witness
     //vector<BIGNUM *> split_each_4bytes_m1(BN_LEN/4);
     BN_vec_new(split_each_4bytes_m);
-    get_32bit_4bytes_BigNumVec(split_each_4bytes_m, witness.witness.enc_witness_witness.dlog_witness[2].gamma, pp_tt);
+    get_32bit_4bytes_BigNumVec(split_each_4bytes_m, witness.witness.enc_witness_witness.dlog_witness[2].w, pp_tt);
 
     //vector<BIGNUM *> each_4bytes_m_beta1(BN_LEN/4);
     BN_vec_new(each_4bytes_m_beta);
@@ -184,7 +184,7 @@ void COCO_Framework_Prove(COCO_Framework_PP &pp,
         EC_POINT_copy(instance.instance.enc_witness_instance.range_instance[1][j].C, each_4bytes_m_res_U_V[j].Y);
     }
 
-    BN_copy(witness.witness.enc_witness_witness.dlog_witness[1].w, witness.witness.enc_witness_witness.dlog_witness[2].gamma);
+    BN_copy(witness.witness.enc_witness_witness.dlog_witness[1].w, witness.witness.enc_witness_witness.dlog_witness[2].w);
 
     getU(instance.instance.enc_witness_instance.dlog_instance[1].U, each_4bytes_m_res_U_V, pp_tt); 
 

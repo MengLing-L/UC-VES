@@ -17,7 +17,6 @@ this hpp implements NIZKPoK for discrete logarithm equality
 #include "../rangeproofs/range_proofs.hpp"
 
 const size_t SIGMA_DLOG_SIZE = 3;
-const size_t RANGE_SIZE = 8;
 
 struct Witness_Encryption_AndR_PP
 {

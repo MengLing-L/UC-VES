@@ -49,6 +49,7 @@ BIGNUM *BN_0;
 BIGNUM *BN_1; 
 BIGNUM *BN_2; 
 
+const size_t RANGE_SIZE = 8;
 /* initialize global variables */
 bool global_initialize(int curve_id)
 {
