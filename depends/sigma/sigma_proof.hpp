@@ -209,8 +209,6 @@ void Sigma_Prove(Sigma_PP &pp,
     BIGNUM *e = BN_new(); 
     Hash_String_to_BN(transcript_str, e); // challenge x
 
-    BN_print(e, "e");
-
     // compute the response
     BN_mul(proof.z1, e, witness.v, bn_ctx); 
     BN_sub(proof.z1, p_s, proof.z1); // z1 = p_s-x*s mod q
@@ -245,7 +243,6 @@ bool Sigma_Verify(Sigma_PP &pp,
     // compute the challenge
     BIGNUM *e = BN_new(); 
     Hash_String_to_BN(transcript_str, e); 
-    BN_print(e, "e");
 
     bool V1, V2, V3; 
      
@@ -265,8 +262,6 @@ bool Sigma_Verify(Sigma_PP &pp,
     vec_x[0] = e;
     vec_x[1] = BN_1;
     EC_POINTs_mul(group, RIGHT, NULL, 2, vec_A, vec_x, bn_ctx); // RIGHT = U^x g^z1 h^z2
-
-    ECP_print(RIGHT, "RIGHT"); 
 
     V1 = (EC_POINT_cmp(group, proof.Y1, RIGHT, bn_ctx) == 0); // Asssert g^p_s h^p_beta =  U^x g^z1 h^z2
 

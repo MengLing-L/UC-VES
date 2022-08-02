@@ -9,10 +9,10 @@ find_package(OpenSSL REQUIRED)
 
 include_directories(${OPENSSL_INCLUDE_DIR})
 
-add_executable(uc_nizk_comparison main/uc_nizk_comparison.cpp)
+add_executable(uc_nonuc_nizk_comparison main/uc_nonuc_nizk_comparison.cpp)
 
-target_link_libraries(uc_nizk_comparison ${OPENSSL_LIBRARIES})
-target_link_libraries(uc_nizk_comparison -lgmp)
+target_link_libraries(uc_nonuc_nizk_comparison ${OPENSSL_LIBRARIES})
+target_link_libraries(uc_nonuc_nizk_comparison -lgmp)
 
 
 add_executable(escrow_protocol_comparison main/escrow_protocol_comparison.cpp)

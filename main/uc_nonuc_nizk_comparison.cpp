@@ -5,9 +5,87 @@
 //#include "../depends/COCO-framework/coco-framework_not_encrypt_random.hpp"
 #include "../depends/twisted_elgamal/twisted_elgamal.hpp"
 #include "../depends/signature/signature.hpp"
+#include "../depends/bulletproofs/aggregate_bulletproof.hpp"
+#include "../depends/sigma/sigma_proof.hpp"
 #include <string.h>
 #include <vector> 
 using namespace std;
+
+void generate_random_instance_witness(Bullet_PP &pp, 
+                                      Bullet_Instance &instance, 
+                                      Bullet_Witness &witness,
+                                      vector<BIGNUM *> &m,
+                                      vector<BIGNUM *> &beta, 
+                                      bool STATEMENT_FLAG)
+{
+    BIGNUM *exp = BN_new(); 
+    BN_set_word(exp, pp.RANGE_LEN);
+
+    BIGNUM *BN_range_size = BN_new(); 
+    BN_mod_exp(BN_range_size, BN_2, exp, order, bn_ctx); 
+    //cout << "range = [" << 0 << "," << BN_bn2hex(BN_range_size) <<")"<<endl; 
+    for(auto i = 0; i < pp.AGG_NUM; i++)
+    {
+        BN_copy(witness.r[i], beta[i]);
+        BN_copy(witness.v[i], m[i]);
+        if (STATEMENT_FLAG == true){
+            BN_mod(witness.v[i], witness.v[i], BN_range_size, bn_ctx);  
+        }
+        EC_POINT_mul(group, instance.C[i], witness.r[i], pp.h, witness.v[i], bn_ctx); 
+    }
+     
+}
+
+void generate_sigma_random_instance_witness(Twisted_ElGamal_PP &pp_tt,
+                                Sigma_PP &pp, 
+                                Sigma_Instance &instance, 
+                                Sigma_Witness &witness, 
+                                BIGNUM* &m,
+                                vector<BIGNUM *> &beta,
+                                vector<Twisted_ElGamal_CT> &CT,
+                                EC_POINT* &pk,
+                                EC_POINT* &R,
+                                EC_POINT* &A,
+                                bool flag)
+{
+    BIGNUM *tmp = BN_new();
+    for(int j=0; j<beta.size(); j++){
+        BN_set_word(tmp, pp_tt.MSG_LEN*(beta.size()-j-1));
+        BN_mod_exp(tmp, BN_2, tmp, order, bn_ctx);
+        BN_mod_mul(tmp, beta[j], tmp, order, bn_ctx);
+        BN_mod_add(witness.r, witness.r, tmp, order, bn_ctx);
+    }
+    BN_copy(witness.v, m);
+
+    EC_POINT_copy(instance.twisted_ek, pk);
+    EC_POINT_copy(instance.R, R);
+    EC_POINT_copy(instance.A, A);
+    
+    //ECP_print(instance.U, "instance.U");
+    getU(instance.U, CT, pp_tt); 
+    //ECP_print(instance.U, "instance.U");
+    EC_POINT *point = EC_POINT_new(group);
+    const EC_POINT *vec_A[2]; 
+    const BIGNUM *vec_x[2];
+    vec_A[0] = pp.g; 
+    vec_A[1] = pp.h;
+    vec_x[0] = m; 
+    vec_x[1] = witness.r;
+    EC_POINTs_mul(group, point, NULL, 2, vec_A, vec_x, bn_ctx); //g^m h^beta
+    #ifdef DEBUG
+    ECP_print(point, "point");
+    bool val = (EC_POINT_cmp(group, point, instance.U, bn_ctx) == 0); 
+    if (val) 
+    { 
+        cout<< "equal point and U >>>" << endl; 
+    }
+    else 
+    {
+        cout<< "unequal point and U >>>" << endl; 
+    }
+    #endif
+    getV(instance.V, CT, pp_tt); 
+}
 
 void test_protocol()
 {
@@ -60,6 +138,28 @@ void test_protocol()
     Modified_Fischlin_Witness_new(witness_mf);
     Modified_Fischlin_Proof proof_mf;
     Modified_Fischlin_Proof_new(proof_mf);
+
+    size_t RANGE_LEN = 32; // range size
+    size_t AGG_NUM = BN_LEN/4;
+    Bullet_PP pp_but; 
+    Bullet_PP_new(pp_but, RANGE_LEN, AGG_NUM);  
+    Bullet_Setup(pp_but, RANGE_LEN, AGG_NUM);
+    Bullet_Instance instance_but; 
+    Bullet_Witness witness_but; 
+    Bullet_Proof proof_but; 
+    Bullet_Instance_new(pp_but, instance_but); 
+    Bullet_Witness_new(pp_but, witness_but); 
+    Bullet_Proof_new(proof_but); 
+
+    Sigma_PP sigma;
+    Sigma_PP_new(sigma);    
+    Sigma_Setup(sigma, enc_pp.h);
+    Sigma_Instance sigma_instance; 
+    Sigma_Instance_new(sigma_instance); 
+    Sigma_Witness sigma_witness; 
+    Sigma_Witness_new(sigma_witness); 
+    Sigma_Proof sigma_proof; 
+    Sigma_Proof_new(sigma_proof);
 
     BIGNUM *m_prime = BN_new();
     BIGNUM *m = BN_new();
@@ -139,6 +239,7 @@ void test_protocol()
 
     EC_POINT_copy(instance.instance.enc_witness_instance.dlog_instance[1].A, signature_result.A);*/
     SplitLine_print('-');
+    cout << "UC-SECURE" << endl;
     BIGNUM *chl = BN_new();
     BN_random(chl);
     auto start_time = chrono::steady_clock::now();
@@ -211,6 +312,7 @@ void test_protocol()
         EC_POINT_mul(group, instance_mf.instance[k].samplable_hard_instance.Q, NULL, generator, m, bn_ctx);
     }
     SplitLine_print('-');
+    cout << "UC-SECURE" << endl;
     //bool Validity = (res == chl); 
     start_time = chrono::steady_clock::now();
     Modified_Fischlin_Prove(pp_mf, instance_mf, witness_mf, proof_mf, keypair.pk);
@@ -225,9 +327,43 @@ void test_protocol()
     running_time = end_time - start_time;
     cout << "Modified Fischlin verifying phase takes time = "
     << chrono::duration <double, milli> (running_time).count() << " ms" << endl;
+
+
+
     SplitLine_print('-');
+    cout << "NON UC-SECURE" << endl;
+    generate_random_instance_witness(pp_but, instance_but, witness_but, split_each_4bytes_m, each_4bytes_m_beta, true);  
+
+    generate_sigma_random_instance_witness(enc_pp, sigma, sigma_instance, sigma_witness, signature_result.s, each_4bytes_m_beta, each_4bytes_m_res_U_V, keypair.pk, signature_result.R, signature_result.A, true); 
     
-    
+    string transcript_str; 
+    string sigma_transcript_str; 
+
+    start_time = chrono::steady_clock::now(); // start to count the time
+    transcript_str = ""; 
+    Bullet_Prove(pp_but, instance_but, witness_but, transcript_str, proof_but);
+    sigma_transcript_str = ""; 
+    Sigma_Prove(sigma, sigma_instance, sigma_witness, sigma_transcript_str, sigma_proof);
+    end_time = chrono::steady_clock::now(); // end to count the time
+    running_time = end_time - start_time;
+    cout << "[Yang 2022] proving phase takes time = "
+    << chrono::duration <double, milli> (running_time).count() << " ms" << endl;
+
+    transcript_str = ""; 
+    start_time = chrono::steady_clock::now();
+    bool validity = true;
+    validity = validity && Bullet_Verify(pp_but, instance_but, transcript_str, proof_but);
+    sigma_transcript_str = ""; 
+    validity = validity && Sigma_Verify(sigma, sigma_instance, sigma_transcript_str, sigma_proof);
+    if (validity){
+        cout << "[Yang 2022] proof accepts. " << endl;
+    }
+    end_time = chrono::steady_clock::now(); // end to count the time
+    running_time = end_time - start_time;
+    cout << "[Yang 2022] verifying phase takes time = "
+    << chrono::duration <double, milli> (running_time).count() << " ms" << endl;
+    SplitLine_print('-');
+
     Twisted_ElGamal_PP_free(enc_pp); 
     Twisted_ElGamal_KP_free(keypair); 
 
@@ -240,6 +376,16 @@ void test_protocol()
     Modified_Fischlin_Instance_free(instance_mf);
     Modified_Fischlin_Witness_free(witness_mf);
     Modified_Fischlin_Proof_free(proof_mf);
+
+    Sigma_PP_free(sigma); 
+    Sigma_Instance_free(sigma_instance);
+    Sigma_Witness_free(sigma_witness);
+    Sigma_Proof_free(sigma_proof); 
+
+    Bullet_PP_free(pp_but); 
+    Bullet_Instance_free(instance_but); 
+    Bullet_Witness_free(witness_but); 
+    Bullet_Proof_free(proof_but); 
 
     BN_free(m);
     BN_free(tmp);
