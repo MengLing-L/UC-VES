@@ -16,7 +16,7 @@ We provide two ways to deploy and run our system. The first one uses Docker to r
     cd ~/UC-VES/build/
     ./uc_nonuc_nizk_comparison
 ```
-6. Run our escrow protocol comparison.
+7. Run our escrow protocol comparison.
 ```
     cd ~/UC-VES/build/
     ./escrow_protocol_comparison
@@ -54,18 +54,27 @@ The current implementation is based on OpenSSL library. See the installment inst
 ```
 
 
-### Testing
+### Compile
 
 
-To compile and test the system, do the following: 
+To compile the system, do the following: 
 
 ```
   $ cd {PATH}/UC-VES
   $ mkdir build && cd build
   $ cmake ..
   $ make
-  $ ./escrow_protocol_comparison
-  $ ./uc_nizk_comparison
+```
+
+### Run nizk comparison.
+```
+    cd ~/UC-VES/build/
+    ./uc_nonuc_nizk_comparison
+```
+### Run escrow protocol comparison.
+```
+    cd ~/UC-VES/build/
+    ./escrow_protocol_comparison
 ```
 
 
