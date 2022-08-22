@@ -1,4 +1,26 @@
 
+We provide two ways to deploy and run our system. The first one uses Docker to run our system where you can pull our image mengling333666/meng:uc-ves, and then you can directly run our system without installing OpenSSL and compiling our code. The second one provides the detailed steps for you to directly deploy our system to your OS.
+
+## Docker
+1. Install Docker. Official guideline (https://docs.docker.com/get-docker/)
+2. Pull our image.
+```
+    docker pull mengling333666/meng:uc-ves
+```
+4. Run the container.
+```
+    docker run -it mengling333666/meng:uc-ves /bin/bash
+```
+6. Run our nizk comparison.
+```
+    cd ~
+    ./uc_nonuc_nizk_comparison
+```
+6. Run our escrow protocol comparison.
+```
+    cd ~
+    ./escrow_protocol_comparison
+```
 ## Direct Deployent 
 
 ### Specifications
