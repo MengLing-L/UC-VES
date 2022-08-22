@@ -13,12 +13,12 @@ We provide two ways to deploy and run our system. The first one uses Docker to r
 ```
 6. Run our nizk comparison.
 ```
-    cd ~
+    cd ~/UC-VES/build/
     ./uc_nonuc_nizk_comparison
 ```
 6. Run our escrow protocol comparison.
 ```
-    cd ~
+    cd ~/UC-VES/build/
     ./escrow_protocol_comparison
 ```
 ## Direct Deployent 
